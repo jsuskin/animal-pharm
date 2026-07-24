@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientInit from "./components/ClientInit";
+import Link from "next/link";
+import Image from "next/image";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +31,11 @@ export default function RootLayout({
         <meta name='apple-mobile-web-app-title' content='AnimalPharm' />
       </head>
       <body className='min-h-full flex flex-col'>
+        <header className='flex justify-center p-1'>
+          <Link href='/'>
+            <Image src='/logo.png' alt='AnimalPharm Logo' width={60} height={60} priority />
+          </Link>
+        </header>
         <ClientInit />
         {children}
       </body>

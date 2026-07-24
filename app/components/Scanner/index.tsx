@@ -1,27 +1,35 @@
 "use client";
 import { useState } from "react";
-import { BarcodeIcon, CheckIcon, FlashlightIcon } from "@phosphor-icons/react";
+import { BarcodeIcon, CheckIcon, FlashlightIcon, QrCodeIcon } from "@phosphor-icons/react";
 import { useZxing } from "react-zxing";
 
 export default function Scanner({
   scannerActive,
   setScannerActive,
-  setResult,
+  setScanResult,
+  scanFormat,
+  setScanFormat
 }: {
   scannerActive: boolean;
   setScannerActive: (isEnabled: boolean) => void;
-  setResult: (result: string) => void;
+  setScanResult: (result: string) => void;
+  scanFormat: "ean_13" | "qr_code";
+  setScanFormat: (scanFormat: "ean_13" | "qr_code") => void;
 }) {
   const [hasCamera, setHasCamera] = useState(false);
   const [torchEnabled, setTorchEnabled] = useState(false);
   const [manualUpcInput, setManualUpcInput] = useState("");
+  
 
   const { ref, torch } = useZxing({
     paused: !scannerActive,
     onDecodeResult(decodedResult) {
-      const result = decodedResult.rawValue;
-      setResult(result);
-      if (result.length) {
+      const format = decodedResult.format;
+      
+      if (format === scanFormat) {
+        const result = decodedResult.rawValue;
+
+        setScanResult(result);
         setScannerActive(false);
         setTorchEnabled(false);
         torch.off();
@@ -42,7 +50,7 @@ export default function Scanner({
       <form
         className='absolute flex left-1/2 -translate-x-1/2 mt-10'
         onSubmit={() => {
-          setResult(manualUpcInput);
+          setScanResult(manualUpcInput);
         }}
       >
         <input
@@ -57,20 +65,26 @@ export default function Scanner({
           <CheckIcon size={24} weight='bold' />
         </button>
       </form>
-      <button
-        onClick={() => {
-          const torchOn = !torchEnabled;
-          setTorchEnabled(torchOn);
-          if (torchOn) {
-            torch.on();
-          } else {
-            torch.off();
-          }
-        }}
-        className='absolute bottom-20 right-10'
-      >
-        <FlashlightIcon size={48} weight={torchEnabled ? "fill" : "regular"} />
-      </button>
+      <div className='flex absolute flex-col gap-6 bottom-20 right-10'>
+        <button onClick={() => {
+          setScanFormat(scanFormat === 'ean_13' ? "qr_code" : "ean_13");
+        }}>
+          {scanFormat === "ean_13" ? <BarcodeIcon size={54} /> : <QrCodeIcon size={54} />}
+        </button>
+        <button
+          onClick={() => {
+            const torchOn = !torchEnabled;
+            setTorchEnabled(torchOn);
+            if (torchOn) {
+              torch.on();
+            } else {
+              torch.off();
+            }
+          }}
+        >
+          <FlashlightIcon size={54} weight={torchEnabled ? "fill" : "regular"} />
+        </button>
+      </div>
       <video ref={ref} muted playsInline className='w-full h-full object-cover' />
     </div>
   );

@@ -7,9 +7,6 @@ export default async function Home() {
 
   return (
     <div className='relative'>
-      <header className='p-4 px-10'>
-        <h1 className='text-4xl'>Animal Pharm</h1>
-      </header>
       <main>
         <HomeClient products={products} />
       </main>

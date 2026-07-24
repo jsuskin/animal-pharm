@@ -1,6 +1,5 @@
 import { create } from "zustand";
-
-type Product = { [key: string]: string }
+import type { Product } from "@/utils/types";
 
 interface Store {
   inventory: Product[];
@@ -10,6 +9,6 @@ interface Store {
 
 export const useStore = create<Store>((set) => ({
   inventory: [],
-  setProducts: (products: Product[]) => set({inventory: products}),
+  setProducts: (products: Product[]) => set({ inventory: products }),
   addProduct: (newProduct) => set((state) => ({ inventory: [...state.inventory, newProduct] })),
 }));
