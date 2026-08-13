@@ -12,3 +12,15 @@ export type Product = {
   upc: string | null;
   qr_code: string | null;
 };
+
+export type ScanFormat = "ean_13" | "qr_code";
+
+export type ScannedItem = {
+  value: string;
+  displayName: string;
+  format: ScanFormat;
+  id: string | undefined;
+  quantity?: number | null;
+  note?: string | null;
+};
+

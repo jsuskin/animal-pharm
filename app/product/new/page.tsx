@@ -1,11 +1,13 @@
 "use client";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
-import { XIcon } from "@phosphor-icons/react";
+import { insertProduct } from "@/actions/inventory";
 import FormInput from "@/app/components/NewProductForm/FormInput";
-import { createClient } from "@/utils/supabase/client";
 import { useStore } from "@/app/store/useStore";
-import type { Product } from "@/utils/types";
+import { getNewProductFormURL } from "@/utils/helperMethods";
+import { createClient } from "@/utils/supabase/client";
+import type { Product, ScanFormat } from "@/utils/types";
+import { XIcon } from "@phosphor-icons/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useState } from "react";
 
 export default function Page() {
   const searchParams = useSearchParams();
@@ -28,51 +30,70 @@ export default function Page() {
 
   // Global State
   const addProduct = useStore((state) => state.addProduct);
+  const updateNameAndIdInQueue = useStore((state) => state.updateNameAndIdInQueue);
+  const scannedQueue = useStore((state) => state.scanner.queue);
+  const scannerActive = useStore((state) => state.scanner.active);
+
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!name || !sku) return;
+
+    const newProduct: Product = {
+      name,
+      manufacturer,
+      size,
+      dosage,
+      type,
+      minimum_quantity: +minimumQuantity,
+      maximum_quantity: +maximumQuantity,
+      sku,
+      notes,
+      upc: scanFormat === "ean_13" ? scanResult : null,
+      qr_code: scanFormat === "qr_code" ? scanResult : null,
+    };
+
+    const { data, error } = await insertProduct(newProduct);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    addProduct(newProduct);
+
+    const queueIndex = scannedQueue.findIndex((item) => item.value === scanResult);
+
+    updateNameAndIdInQueue(queueIndex, data.id, data.name);
+
+    if (scannerActive) {
+      router.push("/");
+      return;
+    }
+
+    const nextNewItem = scannedQueue.find((item) => !item.id);
+
+    router.push(
+      nextNewItem
+        ? getNewProductFormURL(scanResult, scanFormat as ScanFormat)
+        : "/inventory/review",
+    );
+  };
 
   return (
-    <div className='absolute top-0 left-0 bg-black w-full h-screen z-999'>
+    <div className='relative bg-black w-full h-screen'>
       <button
         onClick={() => {
           router.push("/");
         }}
         className='absolute right-0 top-0 m-6'
       >
-        <XIcon size={48} color='white' />
+        <XIcon size={48} className='text-slate-400' />
       </button>
-      <div className='w-full flex justify-center mt-24'>
-        <p className='text-3xl m-8'>{scanResult}</p>
+      <div className='w-full flex justify-center mt-16'>
+        <p className='text-3xl m-8 text-slate-400'>{scanResult}</p>
       </div>
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          console.log("submit");
-
-          if (!name || !sku) return;
-
-          const supabase = await createClient();
-
-          const newProduct: Product = {
-            name,
-            manufacturer,
-            size,
-            dosage,
-            type,
-            minimum_quantity: +minimumQuantity,
-            maximum_quantity: +maximumQuantity,
-            sku,
-            notes,
-            upc: scanFormat === "ean_13" ? scanResult : null,
-            qr_code: scanFormat === "qr_code" ? scanResult : null,
-          };
-
-          const { data } = await supabase.from("products").insert(newProduct).select();
-
-          addProduct(newProduct);
-
-          console.log("Data:", data);
-        }}
-        className='flex flex-col gap-3 my-6'
-      >
+      <form onSubmit={handleSubmit} className='flex flex-col gap-3 my-6'>
         <FormInput label='Name' value={name} setValue={setName} />
         <FormInput label='Manufacturer' value={manufacturer} setValue={setManufacturer} />
         <FormInput label='Min. Quantity' value={minimumQuantity} setValue={setMinimumQuantity} />
@@ -82,7 +103,9 @@ export default function Page() {
         <FormInput label='Type' value={type} setValue={setType} />
         <FormInput label='SKU' value={sku} setValue={setSku} />
         <FormInput label='Notes' value={notes} setValue={setNotes} />
-        <input type='submit' />
+        <button type='submit' className='fixed bottom-0 text-2xl bg-blue-300 p-5 w-full'>
+          SUBMIT
+        </button>
       </form>
     </div>
   );

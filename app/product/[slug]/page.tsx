@@ -1,12 +1,13 @@
 "use client";
 import { useStore } from "@/app/store/useStore";
-import { notFound, usePathname } from "next/navigation";
+import { notFound, usePathname, useRouter } from "next/navigation";
 
 export default function Page() {
   const pathname = usePathname();
   const slug = pathname.split("/").pop();
   const products = useStore((state) => state.inventory);
   const product = products.find((product) => String(product.id) === slug);
+  const router = useRouter();
 
   if (!product) notFound();
 
@@ -40,6 +41,13 @@ export default function Page() {
       <hr />
       <div className='flex flex-col items-end text-4xl text-gray-400 my-6 gap-6'>
         <button>Edit Product Details</button>
+        <button
+          onClick={() => {
+            router.push(`/product/${slug}/lot/new`);
+          }}
+        >
+          Receive Lot
+        </button>
         <button>Adjust Quantity</button>
       </div>
     </div>

@@ -1,64 +1,45 @@
 "use client";
-import { useEffect, useState } from "react";
-import Inventory from "./Inventory";
-import Scanner from "./Scanner";
-import { ScanIcon } from "@phosphor-icons/react";
-import { useStore } from "../store/useStore";
 import type { Product } from "@/utils/types";
-import { useRouter } from "next/navigation";
+import { ScanIcon } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
+import { useStore } from "../store/useStore";
+import Inventory from "./Inventory";
+import InventoryActionButton from "./InventoryActionButton";
+import Scanner from "./Scanner";
 
 export default function HomeClient({ products }: { products: Product[] | null }) {
-  const [scanResult, setScanResult] = useState("");
-  const [scanFormat, setScanFormat] = useState<"ean_13" | "qr_code">("ean_13");
-  const [scannerActive, setScannerActive] = useState(false);
+  const [startTransaction, setStartTransaction] = useState(false);
   const setProducts = useStore((state) => state.setProducts);
-
-  const router = useRouter();
+  const scannerActive = useStore((state) => state.scanner.active);
 
   useEffect(() => {
     if (!products) return;
     setProducts(products);
   }, [products, setProducts]);
 
-  useEffect(() => {
-    if (scanResult && scanResult.length > 0) {
-      const product = products?.find(
-        (product) => product[scanFormat === "ean_13" ? "upc" : "qr_code"] === scanResult,
-      );
-
-      if (product) {
-        router.push(`/product/${product.id}`);
-      } else {
-        const params = new URLSearchParams();
-        params.set("result", scanResult);
-        params.set("format", scanFormat);
-
-        router.push(`/product/new?${params.toString()}`);
-      }
-    }
-  }, [scanResult, scanFormat, router, products]);
-
   return (
     <>
       {scannerActive ? (
-        <Scanner
-          scannerActive={scannerActive}
-          setScannerActive={setScannerActive}
-          setScanResult={setScanResult}
-          scanFormat={scanFormat}
-          setScanFormat={setScanFormat}
-        />
+        <Scanner />
       ) : (
         <>
           <Inventory />
-          <button
-            className='fixed bottom-0 right-0 m-6 p-2 bg-blue-200 rounded-xl'
-            onClick={() => {
-              setScannerActive(true);
-            }}
-          >
-            <ScanIcon size={48} color='black' weight='light' />
-          </button>
+          <div className='fixed flex flex-col bottom-0 right-0 m-6 gap-3'>
+            {startTransaction && (
+              <div className='absolute flex flex-col -top-30 -left-50 gap-3'>
+                <InventoryActionButton mode='RECEIVE' />
+                <InventoryActionButton mode='DISPENSE' />
+              </div>
+            )}
+            <button
+              className='p-2 bg-blue-200 rounded-xl'
+              onClick={() => {
+                setStartTransaction(!startTransaction);
+              }}
+            >
+              <ScanIcon size={48} color='black' weight='light' />
+            </button>
+          </div>
         </>
       )}
     </>

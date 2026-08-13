@@ -3,14 +3,14 @@ import { XIcon } from "@phosphor-icons/react";
 import FormInput from "./FormInput";
 import { createClient } from "@/utils/supabase/client";
 import { useStore } from "@/app/store/useStore";
-import type { Product } from "@/utils/types";
+import type { Product, ScanFormat } from "@/utils/types";
 
 export default function NewProductForm({
   scanResult,
   setScanResult,
   scanFormat,
 }: {
-  scanFormat: "ean_13" | "qr_code";
+  scanFormat: ScanFormat;
   scanResult: string;
   setScanResult: (result: string) => void;
 }) {
@@ -26,6 +26,34 @@ export default function NewProductForm({
 
   const addProduct = useStore((state) => state.addProduct);
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!name || !sku) return;
+
+    const supabase = await createClient();
+
+    const newProduct: Product = {
+      name,
+      manufacturer,
+      size,
+      dosage,
+      type,
+      minimum_quantity: +minimumQuantity,
+      maximum_quantity: +maximumQuantity,
+      sku,
+      notes,
+      upc: scanFormat === "ean_13" ? scanResult : null,
+      qr_code: scanFormat === "qr_code" ? scanResult : null,
+    };
+
+    const { data } = await supabase.from("products").insert(newProduct).select();
+
+    addProduct(newProduct);
+
+    console.log("Data:", data);
+  };
+
   return (
     <div className='absolute top-0 left-0 bg-black w-full h-screen z-999'>
       <button
@@ -39,37 +67,7 @@ export default function NewProductForm({
       <div className='w-full flex justify-center mt-24'>
         <p className='text-3xl m-8'>{scanResult}</p>
       </div>
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          console.log("submit");
-
-          if (!name || !sku) return;
-
-          const supabase = await createClient();
-
-          const newProduct: Product = {
-            name,
-            manufacturer,
-            size,
-            dosage,
-            type,
-            minimum_quantity: +minimumQuantity,
-            maximum_quantity: +maximumQuantity,
-            sku,
-            notes,
-            upc: scanFormat === 'ean_13' ? scanResult : null,
-            qr_code: scanFormat === 'qr_code' ? scanResult : null,
-          };
-
-          const { data } = await supabase.from("products").insert(newProduct).select();
-
-          addProduct(newProduct);
-
-          console.log("Data:", data);
-        }}
-        className='flex flex-col gap-3 my-6'
-      >
+      <form onSubmit={handleSubmit} className='flex flex-col gap-3 my-6'>
         <FormInput label='Name' value={name} setValue={setName} />
         <FormInput label='Manufacturer' value={manufacturer} setValue={setManufacturer} />
         <FormInput label='Min. Quantity' value={minimumQuantity} setValue={setMinimumQuantity} />
