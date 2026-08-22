@@ -24,3 +24,5 @@ export type ScannedItem = {
   note?: string | null;
 };
 
+export type TransactionType = "RECEIVE" | "DISPENSE" | "WASTE" | "ADJUST";
+

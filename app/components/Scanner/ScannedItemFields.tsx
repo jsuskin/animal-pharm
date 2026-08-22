@@ -14,7 +14,7 @@ export default function ScannedItemFields({
   const currentIndex = scannedQueue.findIndex((item) => item.value === scanResult);
 
   return (
-    <section className='absolute flex flex-col left-1/2 -translate-x-1/2 w-full gap-1 p-3'>
+    <section className='absolute flex flex-col left-1/2 -translate-x-1/2 w-full gap-1 p-3 top-14'>
       <input
         className='border border-gray-400 p-2 text-white w-full'
         placeholder='UPC/QR Code'

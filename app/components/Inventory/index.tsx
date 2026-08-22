@@ -7,7 +7,7 @@ export default function Inventory() {
 
   return (
     <ul>
-      {inventory.map((product) => <ProductCard key={product.id} product={product} />)}
+      {inventory.map((product, i) => <ProductCard key={i} product={product} />)}
       <li className='relative p-3 h-24'></li>
     </ul>
   );

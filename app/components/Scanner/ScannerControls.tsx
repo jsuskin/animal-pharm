@@ -18,15 +18,18 @@ export default function ScannerControls({
   const [torchEnabled, setTorchEnabled] = useState(false);
 
   const scannedQueue = useStore((state) => state.scanner.queue);
+  const stopScanner = useStore((state) => state.stopScanner);
 
   const router = useRouter();
 
   return (
-    <div className='flex absolute flex-col gap-3 bottom-20 right-5'>
+    <div className='flex absolute flex-col gap-3 bottom-5 right-5'>
       {scannedQueue.length ? (
         <button
           onClick={() => {
             const nextNewItem = scannedQueue.find((item) => !item.id);
+
+            stopScanner();
 
             router.push(
               nextNewItem
@@ -50,6 +53,7 @@ export default function ScannerControls({
       <button
         onClick={() => {
           const torchOn = !torchEnabled;
+          console.log("Torch Available:", torch.isAvailable);
           setTorchEnabled(torchOn);
           torch[torchOn ? "on" : "off"]();
         }}
