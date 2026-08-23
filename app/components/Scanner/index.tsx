@@ -12,6 +12,7 @@ import ScannedQueue from "./ScannedQueue";
 import ScannerControls from "./ScannerControls";
 import ScannedItemFields from "./ScannedItemFields";
 import { XIcon } from "@phosphor-icons/react";
+import Link from "next/link";
 
 export default function Scanner() {
   const [hasCamera, setHasCamera] = useState(false);
@@ -23,9 +24,12 @@ export default function Scanner() {
   const inventory = useStore((state) => state.inventory);
   const scannerActive = useStore((state) => state.scanner.active);
   const scannedQueue = useStore((state) => state.scanner.queue);
+  const startScanner = useStore((state) => state.startScanner);
   const stopScanner = useStore((state) => state.stopScanner);
 
   const addToScannedQueue = useStore((state) => state.addToScannedQueue);
+
+  const isFullyReady = scannerActive && cameraSelectionComplete;
 
   const { ref, torch } = useZxing({
     paused: !scannerActive || !cameraSelectionComplete,
@@ -67,23 +71,30 @@ export default function Scanner() {
       const id = await selectBestBackCamera();
 
       if (cancelled) return;
-      
+
       setCameraId(id);
       setCameraSelectionComplete(true);
-      // setCameraId("f4bbe2c7cfb7e5d3d8ac3c3d1da7f9e4630b71ffdd61830d5927ed3911cae111");
+      startScanner();
     })();
 
     return () => {
       cancelled = true;
+      stopScanner();
     };
-  }, []);
+  }, [startScanner, stopScanner]);
 
   return (
-    // <div className='absolute top-0 left-0 h-screen'>
-    <div className='absolute -top-16 left-0 h-screen z-1000'>
-      <button onClick={stopScanner} className='absolute right-0 top-0 m-4'>
-        <XIcon size={32} className='text-slate-400' />
-      </button>
+    <div className='fixed inset-0 z-[9999] w-screen h-screen bg-black'>
+      {!isFullyReady && (
+        <div className='absolute inset-0 bg-neutral-900 flex items-center justify-center z-10'>
+          <p className='text-white text-sm'>Initializing camera...</p>
+        </div>
+      )}
+      <Link href='/'>
+        <div className='absolute right-0 top-0 m-4'>
+          <XIcon size={32} className='text-slate-400' />
+        </div>
+      </Link>
       <ScannedItemFields scanResult={scanResult} setScanResult={setScanResult} />
       <ScannerControls scanFormat={scanFormat} setScanFormat={setScanFormat} torch={torch} />
       <ScannedQueue scanResult={scanResult} setScanResult={setScanResult} scanFormat={scanFormat} />

@@ -53,7 +53,6 @@ export default function ScannerControls({
       <button
         onClick={() => {
           const torchOn = !torchEnabled;
-          console.log("Torch Available:", torch.isAvailable);
           setTorchEnabled(torchOn);
           torch[torchOn ? "on" : "off"]();
         }}

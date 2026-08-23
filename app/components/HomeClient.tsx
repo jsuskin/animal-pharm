@@ -5,12 +5,12 @@ import { useEffect, useState } from "react";
 import { useStore } from "../store/useStore";
 import Inventory from "./Inventory";
 import InventoryActionButton from "./InventoryActionButton";
-import Scanner from "./Scanner";
+// import Scanner from "./Scanner";
 
 export default function HomeClient({ products }: { products: Product[] | null }) {
   const [startTransaction, setStartTransaction] = useState(false);
   const setProducts = useStore((state) => state.setProducts);
-  const scannerActive = useStore((state) => state.scanner.active);
+  // const scannerActive = useStore((state) => state.scanner.active);
 
   useEffect(() => {
     if (!products) return;
@@ -19,29 +19,25 @@ export default function HomeClient({ products }: { products: Product[] | null })
 
   return (
     <>
-      {scannerActive ? (
-        <Scanner />
-      ) : (
-        <>
-          <Inventory />
-          <div className='fixed flex flex-col bottom-0 right-0 m-6 gap-3'>
-            {startTransaction && (
-              <div className='absolute flex flex-col -top-30 -left-50 gap-3'>
-                <InventoryActionButton mode='RECEIVE' />
-                <InventoryActionButton mode='DISPENSE' />
-              </div>
-            )}
-            <button
-              className='p-2 bg-blue-200 rounded-xl'
-              onClick={() => {
-                setStartTransaction(!startTransaction);
-              }}
-            >
-              <ScanIcon size={48} color='black' weight='light' />
-            </button>
+      <Inventory />
+      <div className='fixed flex flex-col bottom-0 right-0 m-6 gap-3'>
+        {startTransaction && (
+          <div className='absolute flex flex-col -top-52 -left-36 gap-3'>
+            <InventoryActionButton mode='RECEIVE' />
+            <InventoryActionButton mode='DISPENSE' />
+            <InventoryActionButton mode='ADJUST' />
+            <InventoryActionButton mode='WASTE' />
           </div>
-        </>
-      )}
+        )}
+        <button
+          className='p-2 bg-blue-200 rounded-2xl'
+          onClick={() => {
+            setStartTransaction(!startTransaction);
+          }}
+        >
+          <ScanIcon size={40} color='black' weight='light' />
+        </button>
+      </div>
     </>
   );
 }

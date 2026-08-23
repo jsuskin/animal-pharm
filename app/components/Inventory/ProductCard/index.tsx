@@ -8,7 +8,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <li className='relative p-3 border border-y-gray-800 border-x-black'>
+    <li className='relative px-2 py-1 border border-y-gray-800 border-x-black'>
       <Link href={`/product/${product.id}`}>
         {menuOpen && (
           <ContextMenu
@@ -30,10 +30,10 @@ export default function ProductCard({ product }: { product: Product }) {
           <DotsThreeVerticalIcon size={28} />
         </button>
         <div>
-          <p className='text-lg italic font-extralight'>{product.manufacturer}</p>
-          <p className='text-3xl font-medium'>{product.name}</p>
+          <p className='text-md italic font-extralight'>{product.manufacturer}</p>
+          <p className='text-2xl font-medium'>{product.name}</p>
         </div>
-        <div className='flex justify-between font-light text-sm py-2'>
+        <div className='flex justify-between font-light text-xs py-2'>
           <p>SKU: {product.sku}</p>
           <p>Size: {product.size}</p>
           <p>Dosage: {product.dosage}</p>

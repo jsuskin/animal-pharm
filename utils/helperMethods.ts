@@ -1,4 +1,4 @@
-import { Product, ScanFormat, ScannedItem } from "./types";
+import { Product, ScanFormat } from "./types";
 
 export const getNewProductFormURL = (scanResult: string, scanFormat: ScanFormat) => {
   const params = new URLSearchParams();
