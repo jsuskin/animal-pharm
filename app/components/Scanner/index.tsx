@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useZxing } from "react-zxing";
 import { useStore } from "@/app/store/useStore";
 import {
@@ -7,12 +8,13 @@ import {
   packageScanResultForQueue,
   selectBestBackCamera,
 } from "@/utils/helperMethods";
-import { ScanFormat } from "@/utils/types";
+import { ScanFormat, TransactionType } from "@/utils/types";
 import ScannedQueue from "./ScannedQueue";
 import ScannerControls from "./ScannerControls";
 import ScannedItemFields from "./ScannedItemFields";
 import { XIcon } from "@phosphor-icons/react";
 import Link from "next/link";
+import ScanMode from "./ScanMode";
 
 export default function Scanner() {
   const [hasCamera, setHasCamera] = useState(false);
@@ -22,12 +24,14 @@ export default function Scanner() {
   const [cameraSelectionComplete, setCameraSelectionComplete] = useState(false);
 
   const inventory = useStore((state) => state.inventory);
-  const scannerActive = useStore((state) => state.scanner.active);
+  const scannerActive = useStore((state) => !!state.scanner.mode);
   const scannedQueue = useStore((state) => state.scanner.queue);
   const startScanner = useStore((state) => state.startScanner);
   const stopScanner = useStore((state) => state.stopScanner);
-
   const addToScannedQueue = useStore((state) => state.addToScannedQueue);
+
+  const searchParams = useSearchParams();
+  const scanMode = searchParams.get("action")?.toUpperCase() as TransactionType;
 
   const isFullyReady = scannerActive && cameraSelectionComplete;
 
@@ -74,31 +78,34 @@ export default function Scanner() {
 
       setCameraId(id);
       setCameraSelectionComplete(true);
-      startScanner();
+      startScanner(scanMode);
     })();
 
     return () => {
       cancelled = true;
-      stopScanner();
     };
-  }, [startScanner, stopScanner]);
+  }, [startScanner, scanMode]);
 
   return (
     <div className='fixed inset-0 z-[9999] w-screen h-screen bg-black'>
-      {!isFullyReady && (
-        <div className='absolute inset-0 bg-neutral-900 flex items-center justify-center z-10'>
-          <p className='text-white text-sm'>Initializing camera...</p>
-        </div>
+      {!isFullyReady ? (
+        <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-16 border-[#ccc] border-t-white border-8 rounded-[50%] animate-spin' />
+      ) : (
+        <>
+          <ScanMode />
+          <Link href='/' className='absolute right-0 top-0 m-4' onClick={stopScanner}>
+            <XIcon size={32} className='text-slate-400' />
+          </Link>
+          <ScannedItemFields scanResult={scanResult} setScanResult={setScanResult} />
+          <ScannerControls scanFormat={scanFormat} setScanFormat={setScanFormat} torch={torch} />
+          <ScannedQueue
+            scanResult={scanResult}
+            setScanResult={setScanResult}
+            scanFormat={scanFormat}
+          />
+          <video ref={ref} muted playsInline className='w-full h-full object-cover' />
+        </>
       )}
-      <Link href='/'>
-        <div className='absolute right-0 top-0 m-4'>
-          <XIcon size={32} className='text-slate-400' />
-        </div>
-      </Link>
-      <ScannedItemFields scanResult={scanResult} setScanResult={setScanResult} />
-      <ScannerControls scanFormat={scanFormat} setScanFormat={setScanFormat} torch={torch} />
-      <ScannedQueue scanResult={scanResult} setScanResult={setScanResult} scanFormat={scanFormat} />
-      <video ref={ref} muted playsInline className='w-full h-full object-cover' />
     </div>
   );
 }

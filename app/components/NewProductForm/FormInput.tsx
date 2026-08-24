@@ -4,7 +4,6 @@ export default function FormInput({
   setValue,
   type = "text",
   customStyles = "",
-  direction = "row",
   placeholder = "",
 }: {
   label: string;
@@ -12,7 +11,6 @@ export default function FormInput({
   setValue: (value: string) => void;
   type?: "text" | "date" | "number";
   customStyles?: string;
-  direction?: "row" | "col";
   placeholder?: string;
 }) {
   const isNumeric = () => {
@@ -40,13 +38,9 @@ export default function FormInput({
   return (
     <label
       htmlFor={toKebabCase(label)}
-      className={`flex ${direction === "row" ? "justify-between items-center" : "flex-col my-3"} mx-5 gap-3`}
+      className='flex flex-col my-3 mx-5 gap-1'
     >
-      <span
-        className={`${direction === "row" ? "text-lg text-right" : "text-md text-left"} text-slate-400 w-full`}
-      >
-        {label}
-      </span>
+      <span className='text-slate-400 w-full'>{label}</span>
       <input
         name={toCamelCase(label)}
         id={toKebabCase(label)}

@@ -27,7 +27,7 @@ export default function NewProductForm({ scanResult }: { scanResult: string }) {
   const addProduct = useStore((state) => state.addProduct);
   const updateNameAndIdInQueue = useStore((state) => state.updateNameAndIdInQueue);
   const scannedQueue = useStore((state) => state.scanner.queue);
-  const scannerActive = useStore((state) => state.scanner.active);
+  const scannerActive = useStore((state) => !!state.scanner.mode);
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,7 +78,7 @@ export default function NewProductForm({ scanResult }: { scanResult: string }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className='flex flex-col gap-3 my-6'>
+    <form onSubmit={handleSubmit} className='flex flex-col'>
       <FormInput label='Name' value={name} setValue={setName} />
       <FormInput label='Manufacturer' value={manufacturer} setValue={setManufacturer} />
       <FormInput label='Min. Quantity' value={minimumQuantity} setValue={setMinimumQuantity} />
@@ -88,12 +88,13 @@ export default function NewProductForm({ scanResult }: { scanResult: string }) {
       <FormInput label='Type' value={type} setValue={setType} />
       <FormInput label='SKU' value={sku} setValue={setSku} />
       <FormInput label='Notes' value={notes} setValue={setNotes} />
+      <div className="h-20" />
       <button
         type='submit'
         disabled={!name.length || !manufacturer.length}
-        className='fixed bottom-0 text-2xl bg-blue-300 p-5 w-full 
+        className='fixed bottom-0 text-2xl bg-blue-300 p-2 w-full 
           disabled:bg-slate-300 
-          disabled:opacity-50 
+          disabled:opacity-10 
           disabled:cursor-not-allowed 
           disabled:pointer-events-none'
       >

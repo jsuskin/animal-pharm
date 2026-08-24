@@ -41,7 +41,6 @@ export default function Page() {
                 setValue={(value) => {
                   updateQuantityInQueue(i, +value);
                 }}
-                direction='col'
                 placeholder='Quantity'
               />
               <FormInput
@@ -49,7 +48,6 @@ export default function Page() {
                 label='Lot Number'
                 value=''
                 setValue={() => {}}
-                direction='col'
                 placeholder='Enter Lot Number (Optional)'
               />
             </div>

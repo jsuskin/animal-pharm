@@ -1,13 +1,13 @@
 import { create } from "zustand";
-import type { Product, ScannedItem } from "@/utils/types";
+import type { Product, ScannedItem, TransactionType } from "@/utils/types";
 
 interface Store {
   inventory: Product[];
   setProducts: (products: Product[]) => void;
   addProduct: (newProduct: Product) => void;
   deleteProduct: (id: string) => void;
-  scanner: { queue: ScannedItem[]; active: boolean };
-  startScanner: () => void;
+  scanner: { queue: ScannedItem[]; mode: TransactionType | null };
+  startScanner: (mode: TransactionType) => void;
   stopScanner: () => void;
   scannedQueue: ScannedItem[];
   addToScannedQueue: (newItem: ScannedItem) => void;
@@ -23,9 +23,9 @@ export const useStore = create<Store>((set) => ({
   addProduct: (newProduct) => set((state) => ({ inventory: [...state.inventory, newProduct] })),
   deleteProduct: (id) =>
     set((state) => ({ inventory: state.inventory.filter((product) => product.id !== id) })),
-  scanner: { queue: [], active: false },
-  startScanner: () => set((state) => ({ scanner: { ...state.scanner, active: true } })),
-  stopScanner: () => set((state) => ({ scanner: { ...state.scanner, active: false } })),
+  scanner: { queue: [], mode: null },
+  startScanner: (mode) => set((state) => ({ scanner: { ...state.scanner, mode } })),
+  stopScanner: () => set((state) => ({ scanner: { ...state.scanner, mode: null } })),
   scannedQueue: [],
   addToScannedQueue: (newItem) =>
     set((state) => ({ scanner: { ...state.scanner, queue: [...state.scanner.queue, newItem] } })),
