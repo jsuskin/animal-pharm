@@ -12,7 +12,7 @@ import { ScanFormat, TransactionType } from "@/utils/types";
 import ScannedQueue from "./ScannedQueue";
 import ScannerControls from "./ScannerControls";
 import ScannedItemFields from "./ScannedItemFields";
-import { XIcon } from "@phosphor-icons/react";
+import { InfoIcon, SplitHorizontalIcon, XIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import ScanMode from "./ScanMode";
 
@@ -46,6 +46,7 @@ export default function Scanner() {
 
       if (format === scanFormat) {
         const result = decodedResult.rawValue;
+
         if (scannedQueue.find((item) => item.value === result)) return;
 
         const product = findProductByScanResult(inventory, result, scanFormat);
@@ -93,10 +94,22 @@ export default function Scanner() {
       ) : (
         <>
           <ScanMode />
-          <Link href='/' className='absolute right-0 top-0 m-4' onClick={stopScanner}>
-            <XIcon size={32} className='text-slate-400' />
-          </Link>
-          <ScannedItemFields scanResult={scanResult} setScanResult={setScanResult} />
+          <div className='absolute flex right-0 top-0 m-4 gap-4'>
+            <button>
+              <SplitHorizontalIcon size={32} className='text-slate-400' />
+            </button>
+            <button>
+              <InfoIcon size={32} className='text-slate-400' />
+            </button>
+            <Link href='/' onClick={stopScanner}>
+              <XIcon size={32} className='text-slate-400' />
+            </Link>
+          </div>
+          <ScannedItemFields
+            key={scanResult}
+            scanResult={scanResult}
+            setScanResult={setScanResult}
+          />
           <ScannerControls scanFormat={scanFormat} setScanFormat={setScanFormat} torch={torch} />
           <ScannedQueue
             scanResult={scanResult}

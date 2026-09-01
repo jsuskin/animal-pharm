@@ -29,8 +29,6 @@ export default function ScannerControls({
           onClick={() => {
             const nextNewItem = scannedQueue.find((item) => !item.id);
 
-            stopScanner();
-
             router.push(
               nextNewItem
                 ? getNewProductFormURL(nextNewItem.value, nextNewItem.format)

@@ -28,6 +28,14 @@ export const packageScanResultForQueue = (
   id: product?.id,
   quantity: null,
   note: null,
+  lots: [
+    {
+      lotNumber: null,
+      expirationDate: null,
+      quantity: null,
+      note: null,
+    },
+  ],
 });
 
 export async function selectBestBackCamera() {
@@ -70,7 +78,7 @@ export async function selectBestBackCamera() {
         bestScore = score;
         best = device.deviceId;
       }
-    } catch(err) {
+    } catch (err) {
       console.warn("could not test camera:", device.deviceId, err);
     } finally {
       stream?.getTracks().forEach((t) => t.stop());

@@ -9,7 +9,7 @@ export default function FormInput({
   label: string;
   value: string;
   setValue: (value: string) => void;
-  type?: "text" | "date" | "number";
+  type?: "text" | "date" | "month" | "number";
   customStyles?: string;
   placeholder?: string;
 }) {

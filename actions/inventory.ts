@@ -34,6 +34,7 @@ export async function createNewLotTransaction(
   receivedDate: Date | null,
   quantity: number,
   note: string,
+  mode: TransactionType
 ) {
   const supabase = await createClient();
 
@@ -44,7 +45,7 @@ export async function createNewLotTransaction(
     _received_date: receivedDate,
     _delta: quantity,
     _note: note,
-    _type: "RECEIVE",
+    _type: mode
   });
 
   if (error) {

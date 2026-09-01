@@ -43,7 +43,7 @@ export default function Page() {
         <button>Edit Product Details</button>
         <button
           onClick={() => {
-            router.push(`/product/${slug}/lot/new`);
+            // router.push(`/product/${slug}/lot/new`);
           }}
         >
           Receive Lot

@@ -22,7 +22,15 @@ export type ScannedItem = {
   id: string | undefined;
   quantity?: number | null;
   note?: string | null;
+  lots?: LotInput[];
 };
+
+export type LotInput = {
+  lotNumber: string | null;
+  expirationDate: string | null;
+  quantity: number | null;
+  note: string | null;
+}
 
 export type TransactionType = "RECEIVE" | "DISPENSE" | "WASTE" | "ADJUST";
 
