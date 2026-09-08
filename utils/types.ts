@@ -13,6 +13,8 @@ export type Product = {
   qr_code: string | null;
 };
 
+export type ProductWithQuantity = Product & { quantity: number };
+
 export type ScanFormat = "ean_13" | "qr_code";
 
 export type ScannedItem = {
@@ -30,7 +32,6 @@ export type LotInput = {
   expirationDate: string | null;
   quantity: number | null;
   note: string | null;
-}
+};
 
 export type TransactionType = "RECEIVE" | "DISPENSE" | "WASTE" | "ADJUST";
-
