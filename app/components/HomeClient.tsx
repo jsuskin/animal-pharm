@@ -1,19 +1,18 @@
 "use client";
-import type { Product } from "@/utils/types";
-import { ScanIcon } from "@phosphor-icons/react";
+import type { ProductWithQuantity } from "@/utils/types";
+import { ScanIcon, XIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { useStore } from "../store/useStore";
 import Inventory from "./Inventory";
 import InventoryActionButton from "./InventoryActionButton";
-// import Scanner from "./Scanner";
 
-export default function HomeClient({ products }: { products: Product[] | null }) {
+export default function HomeClient({ products }: { products: ProductWithQuantity[] | null }) {
   const [startTransaction, setStartTransaction] = useState(false);
   const setProducts = useStore((state) => state.setProducts);
-  // const scannerActive = useStore((state) => state.scanner.active);
 
   useEffect(() => {
     if (!products) return;
+
     setProducts(products);
   }, [products, setProducts]);
 
@@ -21,21 +20,24 @@ export default function HomeClient({ products }: { products: Product[] | null })
     <>
       <Inventory />
       <div className='fixed flex flex-col bottom-0 right-0 m-6 gap-3'>
-        {startTransaction && (
-          <div className='absolute flex flex-col -top-52 -left-36 gap-3'>
-            <InventoryActionButton mode='RECEIVE' />
-            <InventoryActionButton mode='DISPENSE' />
-            <InventoryActionButton mode='ADJUST' />
-            <InventoryActionButton mode='WASTE' />
-          </div>
-        )}
+        <div className='absolute flex flex-col -top-52 -left-36 gap-3'>
+          <InventoryActionButton mode='RECEIVE' active={startTransaction} delay={80} />
+          <InventoryActionButton mode='DISPENSE' active={startTransaction} delay={40} />
+          <InventoryActionButton mode='ADJUST' active={startTransaction} delay={20} />
+          <InventoryActionButton mode='WASTE' active={startTransaction} delay={0} />
+        </div>
+
         <button
-          className='p-2 bg-blue-200 rounded-2xl'
-          onClick={() => {
+          className={`p-2 bg-blue-200 ${startTransaction ? "rounded-[50px]" : "rounded-[16px]"} transition-[border-radius] duration-600`}
+          onPointerDown={() => {
             setStartTransaction(!startTransaction);
           }}
         >
-          <ScanIcon size={40} color='black' weight='light' />
+          {startTransaction ? (
+            <XIcon size={40} color='black' weight='bold' />
+          ) : (
+            <ScanIcon size={40} color='black' weight='light' />
+          )}
         </button>
       </div>
     </>
