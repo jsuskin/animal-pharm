@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useStore } from "@/app/store/useStore";
-import LotTabs from "./LotTabs";
+import LotTabs from "../LotTabs";
 import { CheckIcon, XIcon } from "@phosphor-icons/react";
+import ExpiryMonthInput from "./ExpiryMonthInput";
 
 export default function ScannedItemFields({
   scanResult,
@@ -17,10 +18,10 @@ export default function ScannedItemFields({
   const updateQuantityInLot = useStore((state) => state.updateQuantityInLot);
   const updateNoteInLot = useStore((state) => state.updateNoteInLot);
   const updateLotNumberInLot = useStore((state) => state.updateLotNumberInLot);
-  const updateExpirationDateInLot = useStore((state) => state.updateExpirationDateInLot);
   const currentQueueIndex = useStore((state) => state.scanner.currentQueueIndex);
 
-  const numLots = scannedQueue[currentQueueIndex]?.lots?.length ?? 0;
+  const currentItem = scannedQueue[currentQueueIndex];
+  const numLots = currentItem?.lots?.length ?? 0;
 
   return (
     <section>
@@ -34,22 +35,23 @@ export default function ScannedItemFields({
           <input
             className='border border-gray-400 p-2 text-white w-full'
             placeholder='UPC/QR Code'
-            value={codeInput.length ? codeInput : scanResult ?? scannedQueue[currentQueueIndex].value}
-            onChange={(e) => {
-              setCodeInput(e.target.value)
-            }}
+            value={codeInput.length ? codeInput : (scanResult ?? currentItem.value)}
+            onChange={(e) => setCodeInput(e.target.value)}
           />
-          <div className={`absolute ${codeInput.length ? "flex" : "hidden"} items-center top-0 right-0 mx-4 gap-3 h-full`}>
-            <button className="text-green-500" onClick={() => {
-              setScanResult(codeInput);
-              setCodeInput("");
-            }}>
-              <CheckIcon size={24} weight="bold" />
+          <div
+            className={`absolute ${codeInput.length ? "flex" : "hidden"} items-center top-0 right-0 mx-4 gap-3 h-full`}
+          >
+            <button
+              className='text-green-500'
+              onClick={() => {
+                setScanResult(codeInput);
+                setCodeInput("");
+              }}
+            >
+              <CheckIcon size={24} weight='bold' />
             </button>
-            <button className="text-red-500" onClick={() => {
-              setCodeInput("");
-            }}>
-              <XIcon size={24} weight="bold" />
+            <button className='text-red-500' onClick={() => setCodeInput("")}>
+              <XIcon size={24} weight='bold' />
             </button>
           </div>
         </div>
@@ -58,37 +60,30 @@ export default function ScannedItemFields({
             <input
               type='number'
               className='border border-gray-400 p-2 text-white w-full'
-              value={
-                scannedQueue[currentQueueIndex]?.lots![currentLotIndex]?.quantity?.toString() ?? ""
+              value={currentItem?.lots![currentLotIndex]?.quantity?.toString() ?? ""}
+              onChange={(e) =>
+                updateQuantityInLot(currentQueueIndex, currentLotIndex, +e.target.value)
               }
-              onChange={(e) => {
-                updateQuantityInLot(currentQueueIndex, currentLotIndex, +e.target.value);
-              }}
               placeholder='Quantity'
             />
             <input
               className='border border-gray-400 p-2 text-white w-full'
-              value={scannedQueue[currentQueueIndex]?.lots![currentLotIndex]?.lotNumber ?? ""}
+              value={currentItem?.lots![currentLotIndex]?.lotNumber ?? ""}
               onChange={(e) => {
                 updateLotNumberInLot(currentQueueIndex, currentLotIndex, e.target.value);
               }}
               placeholder='Lot Number'
             />
-            <input
-              className='border border-gray-400 p-2 text-white w-full'
-              value={scannedQueue[currentQueueIndex]?.lots![currentLotIndex]?.expirationDate ?? ""}
-              onChange={(e) => {
-                updateExpirationDateInLot(currentQueueIndex, currentLotIndex, e.target.value);
-              }}
-              placeholder='Expiration Date'
+            <ExpiryMonthInput
+              currentQueueIndex={currentQueueIndex}
+              currentLotIndex={currentLotIndex}
+              currentItem={currentItem}
             />
             <input
               className='border border-gray-400 p-2 text-white w-full'
               placeholder='Note'
-              value={scannedQueue[currentQueueIndex]?.lots![currentLotIndex]?.note ?? ""}
-              onChange={(e) => {
-                updateNoteInLot(currentQueueIndex, currentLotIndex, e.target.value);
-              }}
+              value={currentItem?.lots![currentLotIndex]?.note ?? ""}
+              onChange={(e) => updateNoteInLot(currentQueueIndex, currentLotIndex, e.target.value)}
             />
           </>
         )}
