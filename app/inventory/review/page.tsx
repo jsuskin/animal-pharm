@@ -10,6 +10,8 @@ export default function Page() {
   const scannedQueue = useStore((state) => state.scanner.queue);
   const addNewEmptyLotObjectInQueue = useStore((state) => state.addNewEmptyLotObjectInQueue);
 
+  const isDisabled = scannedQueue.some((item) => item.lots?.some((lot) => !lot.quantity));
+
   return (
     <div>
       <div className='w-full flex justify-center mt-4'>
@@ -21,6 +23,8 @@ export default function Page() {
         onSubmit={async (e) => {
           e.preventDefault();
 
+          if (isDisabled) return;
+
           for (const item of scannedQueue) {
             if (!item || !item.lots) return;
 
@@ -28,12 +32,19 @@ export default function Page() {
               const [expYear, expMonth] = lot.expirationDate?.split("-").map(Number) ?? [];
               const expirationDate = new Date(expYear, expMonth, 0).toISOString().split("T")[0];
 
+              const quantity =
+                scanMode === "RECEIVE"
+                  ? lot.quantity!
+                  : scanMode === "DISPENSE" || scanMode === "WASTE"
+                    ? lot.quantity! * -1
+                    : /* CURRENT_QUANTITY_IN_DATABASE - */lot.quantity!;
+
               const newLotTransaction = await createNewLotTransaction(
                 lot.lotNumber ?? "",
                 expirationDate,
                 +item.id!,
                 new Date(),
-                lot.quantity!,
+                quantity,
                 lot.note ?? "",
                 scanMode!,
               );
@@ -67,7 +78,7 @@ export default function Page() {
         <div className='h-20' />
         <button
           type='submit'
-          disabled={scannedQueue.some((item) => item.lots?.some((lot) => !lot.quantity))}
+          disabled={isDisabled}
           className='fixed bottom-0 text-2xl bg-blue-300 p-2 w-full 
             disabled:bg-slate-300 
             disabled:opacity-10 
