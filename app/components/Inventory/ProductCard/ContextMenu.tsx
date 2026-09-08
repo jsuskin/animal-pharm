@@ -14,8 +14,8 @@ export default function ContextMenu({
   return (
     <div className='absolute flex flex-col p-2 px-4 top-7 right-8 bg-blue-200 rounded-sm z-99 gap-2'>
       <button onClick={() => {}} className='flex items-center gap-1'>
-        <PencilSimpleIcon size={28} color='black' />
-        <span className='text-2xl text-black'>EDIT</span>
+        <PencilSimpleIcon size={20} color='black' />
+        <span className='text-lg text-black'>EDIT</span>
       </button>
       <button
         onClick={async (e) => {
@@ -35,8 +35,8 @@ export default function ContextMenu({
         }}
         className='flex items-center gap-1'
       >
-        <TrashIcon size={28} color='black' />
-        <span className='text-2xl text-black'>DELETE</span>
+        <TrashIcon size={20} color='black' />
+        <span className='text-lg text-black'>DELETE</span>
       </button>
     </div>
   );

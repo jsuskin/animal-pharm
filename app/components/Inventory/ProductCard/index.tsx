@@ -1,10 +1,10 @@
-import { Product } from "@/utils/types";
+import { ProductWithQuantity } from "@/utils/types";
 import { DotsThreeVerticalIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import ContextMenu from "./ContextMenu";
 import Link from "next/link";
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product }: { product: ProductWithQuantity }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -37,7 +37,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <p>SKU: {product.sku}</p>
           <p>Size: {product.size}</p>
           <p>Dosage: {product.dosage}</p>
-          <p>Qty: XX</p>
+          <p>Qty: {product.quantity}</p>
         </div>
       </Link>
     </li>
