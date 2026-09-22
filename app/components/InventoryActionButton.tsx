@@ -14,13 +14,16 @@ export default function InventoryActionButton({
 }: {
   mode: "RECEIVE" | "DISPENSE" | "ADJUST" | "WASTE";
   active: boolean;
-  delay: 0 | 20 | 40 | 80;
+  delay: number;
 }) {
   const iconProps = { size: 20, weight: "bold" as IconWeight };
 
+  console.log("Delay:", delay);
+
   return (
     <div
-      className={`${active ? "translate-y-0 translate-x-0 pointer-events-auto" : "translate-y-100 translate-x-100 pointer-events-none"} transition-transform duration-200 delay-[${delay}ms]`}
+      className={`${active ? "translate-y-0 translate-x-0 pointer-events-auto" : "translate-y-100 translate-x-100 pointer-events-none"} transition-transform duration-200`}
+      style={{ transitionDelay: `${delay}ms` }}
     >
       <Link href={`/scan?action=${mode.toLowerCase()}`}>
         <div className='flex justify-end items-center py-2 px-3 bg-blue-200 rounded-xl text-xl text-black font-bold gap-2'>

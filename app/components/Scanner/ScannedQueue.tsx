@@ -26,7 +26,7 @@ export default function ScannedQueue({
           className={`
               flex items-center gap-2 p-1 text-sm rounded-xl
               ${currentQueueIndex === i ? "bg-black/25" : "bg-transparent"}
-              text-${item.id ? "green-300" : "yellow-200"}
+              ${item.id ? "text-green-300" : "text-yellow-200"}
             `}
         >
           <button

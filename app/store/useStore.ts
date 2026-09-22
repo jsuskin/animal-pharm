@@ -13,7 +13,7 @@ interface Store {
   setCurrentQueueIndex: (idx: number) => void;
   removeFromScannedQueue: (idx: number) => void;
   updateNameAndIdInQueue: (idx: number, id: string, displayName: string) => void;
-  updateQuantityInQueue: (queueIdx: number, qty: number) => void;
+  updateQuantityInQueue: (queueIdx: number, quantity: number) => void;
   updateItemNoteInQueue: (queueIdx: number, note: string) => void;
   addNewEmptyLotObjectInQueue: (queueIdx: number) => void;
   updateLotNumberInLot: (queueIdx: number, lotIdx: number, lotNumber: string) => void;
@@ -54,12 +54,12 @@ export const useStore = create<Store>((set) => ({
         ),
       },
     })),
-  updateQuantityInQueue: (queueIdx, qty) =>
+  updateQuantityInQueue: (queueIdx, quantity) =>
     set((state) => ({
       scanner: {
         ...state.scanner,
         queue: state.scanner.queue.map((item, i) =>
-          i === queueIdx ? { ...item, quantity: qty } : item,
+          i === queueIdx ? { ...item, quantity } : item,
         ),
       },
     })),

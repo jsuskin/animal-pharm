@@ -21,7 +21,7 @@ export default function HomeClient({ products }: { products: ProductWithQuantity
       <Inventory />
       <div className='fixed flex flex-col bottom-0 right-0 m-6 gap-3'>
         <div className='absolute flex flex-col -top-52 -left-36 gap-3'>
-          <InventoryActionButton mode='RECEIVE' active={startTransaction} delay={80} />
+          <InventoryActionButton mode='RECEIVE' active={startTransaction} delay={60} />
           <InventoryActionButton mode='DISPENSE' active={startTransaction} delay={40} />
           <InventoryActionButton mode='ADJUST' active={startTransaction} delay={20} />
           <InventoryActionButton mode='WASTE' active={startTransaction} delay={0} />

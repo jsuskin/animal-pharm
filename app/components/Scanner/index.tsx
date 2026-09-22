@@ -109,6 +109,7 @@ export default function Scanner() {
             key={scanResult}
             scanResult={scanResult}
             setScanResult={setScanResult}
+            scanMode={scanMode}
           />
           <ScannerControls scanFormat={scanFormat} setScanFormat={setScanFormat} torch={torch} />
           <ScannedQueue

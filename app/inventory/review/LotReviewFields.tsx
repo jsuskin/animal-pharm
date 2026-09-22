@@ -1,17 +1,20 @@
 import FormInput from "@/app/components/NewProductForm/FormInput";
 import { useStore } from "@/app/store/useStore";
-import { LotInput, ScannedItem } from "@/utils/types";
+import { LotInput, ScannedItem, TransactionType } from "@/utils/types";
+import LotDropdown from "./LotDropdown";
 
 export default function LotReviewFields({
   queueIndex,
   lotIndex,
   item,
   lot,
+  scanMode,
 }: {
   queueIndex: number;
   lotIndex: number;
   item: ScannedItem;
   lot: LotInput;
+  scanMode: TransactionType | null;
 }) {
   // const updateQuantityInQueue = useStore((state) => state.updateQuantityInQueue);
   // const updateItemNoteInQueue = useStore((state) => state.updateItemNoteInQueue);
@@ -32,20 +35,22 @@ export default function LotReviewFields({
         }}
         placeholder='Quantity'
       />
-      <FormInput
-        type='number'
-        label='Lot Number'
-        value={lot.lotNumber ?? ""}
-        setValue={(value) => {
-          updateLotNumberInLot(queueIndex, lotIndex, value);
-        }}
-        placeholder='Enter Lot Number (Optional)'
-      />
+      {scanMode === "RECEIVE" ? (
+        <FormInput
+          type='number'
+          label='Lot Number'
+          value={lot.lotNumber ?? ""}
+          setValue={(value) => {
+            updateLotNumberInLot(queueIndex, lotIndex, value);
+          }}
+          placeholder='Enter Lot Number (Optional)'
+        />
+      ) : <LotDropdown productId={item.id} />}
       <FormInput
         type='month'
         label='Expiration Date'
         value={lot.expirationDate ?? ""}
-        setValue={(value) => {          
+        setValue={(value) => {
           updateExpirationDateInLot(queueIndex, lotIndex, value);
         }}
         customStyles='w-full'

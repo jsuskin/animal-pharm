@@ -29,12 +29,13 @@ export async function deleteProduct(id: string) {
 
 export async function createNewLotTransaction(
   lotNumber: string,
-  expirationDate: string,
+  expirationDate: string | null,
   productId: number,
   receivedDate: Date | null,
   quantity: number,
   note: string,
-  mode: TransactionType
+  mode: TransactionType,
+  source: string = "manufacturer", // temp type/default
 ) {
   const supabase = await createClient();
 
@@ -44,8 +45,9 @@ export async function createNewLotTransaction(
     _product_id: productId,
     _received_date: receivedDate,
     _delta: quantity,
+    _type: mode,
     _note: note,
-    _type: mode
+    _source: source,
   });
 
   if (error) {
@@ -54,6 +56,29 @@ export async function createNewLotTransaction(
   }
 
   console.log("New Lot Data:", data);
+
+  return data;
+}
+
+export async function createDispenseTransaction(
+  product_id: number,
+  quantity: number,
+  type: string,
+  note: string,
+) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("create_dispense_transaction", {
+    _product_id: product_id,
+    _quantity: quantity,
+    _type: type,
+    _note: note,
+  });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   return data;
 }

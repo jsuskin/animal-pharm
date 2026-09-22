@@ -1,14 +1,17 @@
 "use client";
 import { useStore } from "@/app/store/useStore";
 import { PlusIcon } from "@phosphor-icons/react";
-import { createNewLotTransaction } from "@/actions/inventory";
+import { createDispenseTransaction, createNewLotTransaction } from "@/actions/inventory";
 import LotReviewFields from "./LotReviewFields";
 import Separator from "@/app/components/Separator";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const scanMode = useStore((state) => state.scanner.mode);
   const scannedQueue = useStore((state) => state.scanner.queue);
   const addNewEmptyLotObjectInQueue = useStore((state) => state.addNewEmptyLotObjectInQueue);
+
+  const router = useRouter();
 
   const isDisabled = scannedQueue.some((item) => item.lots?.some((lot) => !lot.quantity));
 
@@ -25,32 +28,56 @@ export default function Page() {
 
           if (isDisabled) return;
 
-          for (const item of scannedQueue) {
-            if (!item || !item.lots) return;
+          try {
+            for (const item of scannedQueue) {
+              if (!item || !item.lots) return;
 
-            for (const lot of item.lots) {
-              const [expYear, expMonth] = lot.expirationDate?.split("-").map(Number) ?? [];
-              const expirationDate = new Date(expYear, expMonth, 0).toISOString().split("T")[0];
+              if (scanMode === "RECEIVE") {
+                for (const lot of item.lots) {
+                  let expirationDate: string | null = null;
 
-              const quantity =
-                scanMode === "RECEIVE"
-                  ? lot.quantity!
-                  : scanMode === "DISPENSE" || scanMode === "WASTE"
-                    ? lot.quantity! * -1
-                    : /* CURRENT_QUANTITY_IN_DATABASE - */lot.quantity!;
+                  if (lot.expirationDate) {
+                    const [expYear, expMonth] = lot.expirationDate.split("-").map(Number);
 
-              const newLotTransaction = await createNewLotTransaction(
-                lot.lotNumber ?? "",
-                expirationDate,
-                +item.id!,
-                new Date(),
-                quantity,
-                lot.note ?? "",
-                scanMode!,
-              );
+                    if (expYear && expMonth) {
+                      const dateObj = new Date(expYear, expMonth, 0);
 
-              console.log("New Lot Transaction:", newLotTransaction);
+                      if (!isNaN(dateObj.getTime()))
+                        expirationDate = dateObj.toISOString().split("T")[0];
+                    }
+                  }
+
+                  const source = "manufacturer"; // !!! TEMP !!!
+
+                  const newLotTransaction = await createNewLotTransaction(
+                    lot.lotNumber ?? "",
+                    expirationDate,
+                    +item.id!,
+                    new Date(),
+                    lot.quantity!,
+                    lot.note ?? "",
+                    scanMode!,
+                    source,
+                  );
+
+                  console.log("New Lot Transaction:", newLotTransaction);
+                }
+              } else {
+                const newDispenseTransaction = await createDispenseTransaction(
+                  +item.id!,
+                  item.quantity! * -1,
+                  scanMode!,
+                  item.note!,
+                );
+
+                console.log("New Dispense Transaction", newDispenseTransaction);
+              }
+
+              router.push("/");
             }
+          } catch (error) {
+            console.error("Failed to process transaction queue:", error);
+            // maybe a toast or smth here
           }
         }}
       >
@@ -61,7 +88,13 @@ export default function Page() {
             {item.lots?.map((lot, j) => (
               <div key={j}>
                 {j > 0 && <Separator variant='dark-center' />}
-                <LotReviewFields queueIndex={i} lotIndex={j} item={item} lot={lot} />
+                <LotReviewFields
+                  queueIndex={i}
+                  lotIndex={j}
+                  item={item}
+                  lot={lot}
+                  scanMode={scanMode}
+                />
               </div>
             ))}
             <button

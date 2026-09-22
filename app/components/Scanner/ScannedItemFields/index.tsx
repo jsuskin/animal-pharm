@@ -3,25 +3,39 @@ import { useStore } from "@/app/store/useStore";
 import LotTabs from "../LotTabs";
 import { CheckIcon, XIcon } from "@phosphor-icons/react";
 import ExpiryMonthInput from "./ExpiryMonthInput";
+import { TransactionType } from "@/utils/types";
 
 export default function ScannedItemFields({
   scanResult,
   setScanResult,
+  scanMode,
 }: {
   scanResult: string;
   setScanResult: (result: string) => void;
+  scanMode: TransactionType;
 }) {
   const [currentLotIndex, setCurrentLotIndex] = useState(0);
   const [codeInput, setCodeInput] = useState(""); // For manual input
 
   const scannedQueue = useStore((state) => state.scanner.queue);
   const updateQuantityInLot = useStore((state) => state.updateQuantityInLot);
+  const updateQuantityInQueue = useStore((state) => state.updateQuantityInQueue);
   const updateNoteInLot = useStore((state) => state.updateNoteInLot);
   const updateLotNumberInLot = useStore((state) => state.updateLotNumberInLot);
   const currentQueueIndex = useStore((state) => state.scanner.currentQueueIndex);
 
   const currentItem = scannedQueue[currentQueueIndex];
   const numLots = currentItem?.lots?.length ?? 0;
+
+  const quantity =
+    (scanMode === "RECEIVE"
+      ? currentItem?.lots![currentLotIndex]?.quantity?.toString()
+      : currentItem?.quantity) ?? "";
+
+  const setQuantity = (e: React.ChangeEvent<HTMLInputElement>) =>
+    scanMode === "RECEIVE"
+      ? updateQuantityInLot(currentQueueIndex, currentLotIndex, +e.target.value)
+      : updateQuantityInQueue(currentQueueIndex, +e.target.value);
 
   return (
     <section>
@@ -60,10 +74,8 @@ export default function ScannedItemFields({
             <input
               type='number'
               className='border border-gray-400 p-2 text-white w-full'
-              value={currentItem?.lots![currentLotIndex]?.quantity?.toString() ?? ""}
-              onChange={(e) =>
-                updateQuantityInLot(currentQueueIndex, currentLotIndex, +e.target.value)
-              }
+              value={quantity}
+              onChange={setQuantity}
               placeholder='Quantity'
             />
             <input
