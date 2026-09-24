@@ -13,7 +13,68 @@ export default function Page() {
 
   const router = useRouter();
 
-  const isDisabled = scannedQueue.some((item) => item.lots?.some((lot) => !lot.quantity));
+  const isDisabled = scannedQueue.some((item) =>
+    scanMode === "RECEIVE" ? item.lots?.some((lot) => !lot.quantity) : !item.quantity,
+  );
+
+  const handleSubmit = async (e: React.SubmitEvent) => {
+    e.preventDefault();
+
+    if (isDisabled) return;
+
+    try {
+      for (const item of scannedQueue) {
+        if (!item) return;
+
+        if (scanMode === "RECEIVE") {
+          if (!item.lots) return;
+
+          for (const lot of item.lots) {
+            let expirationDate: string | null = null;
+
+            if (lot.expirationDate) {
+              const [expYear, expMonth] = lot.expirationDate.split("-").map(Number);
+
+              if (expYear && expMonth) {
+                const dateObj = new Date(expYear, expMonth, 0);
+
+                if (!isNaN(dateObj.getTime())) expirationDate = dateObj.toISOString().split("T")[0];
+              }
+            }
+
+            const source = "manufacturer"; // !!! TEMP !!!
+
+            const newLotTransaction = await createNewLotTransaction(
+              lot.lotNumber ?? "",
+              expirationDate,
+              +item.id!,
+              new Date(),
+              lot.quantity!,
+              lot.note ?? "",
+              scanMode!,
+              source,
+            );
+
+            console.log("New Lot Transaction:", newLotTransaction);
+          }
+        } else {
+          const newDispenseTransaction = await createDispenseTransaction(
+            +item.id!,
+            item.quantity!,
+            scanMode!,
+            item.note!,
+          );
+
+          console.log("New Dispense Transaction", newDispenseTransaction);
+        }
+
+        router.push("/");
+      }
+    } catch (error) {
+      console.error("Failed to process transaction queue:", error);
+      // maybe a toast or smth here
+    }
+  };
 
   return (
     <div>
@@ -22,65 +83,7 @@ export default function Page() {
           <span className='font-extrabold'>{scanMode}</span> Transaction Review
         </p>
       </div>
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-
-          if (isDisabled) return;
-
-          try {
-            for (const item of scannedQueue) {
-              if (!item || !item.lots) return;
-
-              if (scanMode === "RECEIVE") {
-                for (const lot of item.lots) {
-                  let expirationDate: string | null = null;
-
-                  if (lot.expirationDate) {
-                    const [expYear, expMonth] = lot.expirationDate.split("-").map(Number);
-
-                    if (expYear && expMonth) {
-                      const dateObj = new Date(expYear, expMonth, 0);
-
-                      if (!isNaN(dateObj.getTime()))
-                        expirationDate = dateObj.toISOString().split("T")[0];
-                    }
-                  }
-
-                  const source = "manufacturer"; // !!! TEMP !!!
-
-                  const newLotTransaction = await createNewLotTransaction(
-                    lot.lotNumber ?? "",
-                    expirationDate,
-                    +item.id!,
-                    new Date(),
-                    lot.quantity!,
-                    lot.note ?? "",
-                    scanMode!,
-                    source,
-                  );
-
-                  console.log("New Lot Transaction:", newLotTransaction);
-                }
-              } else {
-                const newDispenseTransaction = await createDispenseTransaction(
-                  +item.id!,
-                  item.quantity! * -1,
-                  scanMode!,
-                  item.note!,
-                );
-
-                console.log("New Dispense Transaction", newDispenseTransaction);
-              }
-
-              router.push("/");
-            }
-          } catch (error) {
-            console.error("Failed to process transaction queue:", error);
-            // maybe a toast or smth here
-          }
-        }}
-      >
+      <form onSubmit={handleSubmit}>
         {scannedQueue.map((item, i) => (
           <div key={i} className='flex flex-col my-4'>
             <Separator />
@@ -97,15 +100,17 @@ export default function Page() {
                 />
               </div>
             ))}
-            <button
-              className='flex flex-col items-center mt-1 mb-2'
-              onClick={() => {
-                addNewEmptyLotObjectInQueue(i);
-              }}
-            >
-              <PlusIcon size={20} />
-              <span className='text-xs'>Add New Lot</span>
-            </button>
+            {scanMode === "RECEIVE" && (
+              <button
+                className='flex flex-col items-center mt-1 mb-2'
+                onClick={() => {
+                  addNewEmptyLotObjectInQueue(i);
+                }}
+              >
+                <PlusIcon size={20} />
+                <span className='text-xs'>Add New Lot</span>
+              </button>
+            )}
           </div>
         ))}
         <div className='h-20' />

@@ -18,8 +18,6 @@ export default function InventoryActionButton({
 }) {
   const iconProps = { size: 20, weight: "bold" as IconWeight };
 
-  console.log("Delay:", delay);
-
   return (
     <div
       className={`${active ? "translate-y-0 translate-x-0 pointer-events-auto" : "translate-y-100 translate-x-100 pointer-events-none"} transition-transform duration-200`}

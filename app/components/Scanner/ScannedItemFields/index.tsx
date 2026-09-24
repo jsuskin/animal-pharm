@@ -21,6 +21,7 @@ export default function ScannedItemFields({
   const updateQuantityInLot = useStore((state) => state.updateQuantityInLot);
   const updateQuantityInQueue = useStore((state) => state.updateQuantityInQueue);
   const updateNoteInLot = useStore((state) => state.updateNoteInLot);
+  const updateNoteInQueue = useStore((state) => state.updateItemNoteInQueue);
   const updateLotNumberInLot = useStore((state) => state.updateLotNumberInLot);
   const currentQueueIndex = useStore((state) => state.scanner.currentQueueIndex);
 
@@ -37,13 +38,23 @@ export default function ScannedItemFields({
       ? updateQuantityInLot(currentQueueIndex, currentLotIndex, +e.target.value)
       : updateQuantityInQueue(currentQueueIndex, +e.target.value);
 
+  const note =
+    scanMode === "RECEIVE" ? currentItem?.lots![currentLotIndex]?.note : currentItem?.note;
+
+  const setNote = (e: React.ChangeEvent<HTMLInputElement>) =>
+    scanMode === "RECEIVE"
+      ? updateNoteInLot(currentQueueIndex, currentLotIndex, e.target.value)
+      : updateNoteInQueue(currentQueueIndex, e.target.value);
+
   return (
     <section>
-      <LotTabs
-        currentLotIndex={currentLotIndex}
-        setCurrentLotIndex={setCurrentLotIndex}
-        numLots={numLots}
-      />
+      {scanMode === "RECEIVE" && (
+        <LotTabs
+          currentLotIndex={currentLotIndex}
+          setCurrentLotIndex={setCurrentLotIndex}
+          numLots={numLots}
+        />
+      )}
       <div className='absolute flex flex-col left-1/2 -translate-x-1/2 w-full gap-1 p-3 top-18'>
         <div className='relative'>
           <input
@@ -78,24 +89,28 @@ export default function ScannedItemFields({
               onChange={setQuantity}
               placeholder='Quantity'
             />
-            <input
-              className='border border-gray-400 p-2 text-white w-full'
-              value={currentItem?.lots![currentLotIndex]?.lotNumber ?? ""}
-              onChange={(e) => {
-                updateLotNumberInLot(currentQueueIndex, currentLotIndex, e.target.value);
-              }}
-              placeholder='Lot Number'
-            />
-            <ExpiryMonthInput
-              currentQueueIndex={currentQueueIndex}
-              currentLotIndex={currentLotIndex}
-              currentItem={currentItem}
-            />
+            {scanMode === "RECEIVE" && (
+              <>
+                <input
+                  className='border border-gray-400 p-2 text-white w-full'
+                  value={currentItem?.lots![currentLotIndex]?.lotNumber ?? ""}
+                  onChange={(e) => {
+                    updateLotNumberInLot(currentQueueIndex, currentLotIndex, e.target.value);
+                  }}
+                  placeholder='Lot Number'
+                />
+                <ExpiryMonthInput
+                  currentQueueIndex={currentQueueIndex}
+                  currentLotIndex={currentLotIndex}
+                  currentItem={currentItem}
+                />
+              </>
+            )}
             <input
               className='border border-gray-400 p-2 text-white w-full'
               placeholder='Note'
-              value={currentItem?.lots![currentLotIndex]?.note ?? ""}
-              onChange={(e) => updateNoteInLot(currentQueueIndex, currentLotIndex, e.target.value)}
+              value={note ?? ""}
+              onChange={setNote}
             />
           </>
         )}

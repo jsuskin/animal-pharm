@@ -16,51 +16,67 @@ export default function LotReviewFields({
   lot: LotInput;
   scanMode: TransactionType | null;
 }) {
-  // const updateQuantityInQueue = useStore((state) => state.updateQuantityInQueue);
-  // const updateItemNoteInQueue = useStore((state) => state.updateItemNoteInQueue);
+  const updateQuantityInQueue = useStore((state) => state.updateQuantityInQueue);
+  const updateItemNoteInQueue = useStore((state) => state.updateItemNoteInQueue);
   const updateQuantityInLot = useStore((state) => state.updateQuantityInLot);
   const updateNoteInLot = useStore((state) => state.updateNoteInLot);
   const updateExpirationDateInLot = useStore((state) => state.updateExpirationDateInLot);
   const updateLotNumberInLot = useStore((state) => state.updateLotNumberInLot);
 
+  console.log("Scan Mode:", scanMode, "Lot index:", lotIndex, "Lot:", lot);
+
   return (
     <div className='my-3'>
       <FormInput
         type='number'
-        label={`Lot ${lotIndex + 1} Quantity`}
-        value={lot.quantity?.toString() ?? ""}
+        label={scanMode === "RECEIVE" ? `Lot ${lotIndex + 1} Quantity` : "Quantity"}
+        value={
+          (scanMode === "RECEIVE" ? lot.quantity?.toString() : item.quantity?.toString()) ?? ""
+        }
         setValue={(value) => {
-          updateQuantityInLot(queueIndex, lotIndex, +value);
-          // updateQuantityInQueue(queueIndex, +value);
+          if (scanMode === "RECEIVE") {
+            updateQuantityInLot(queueIndex, lotIndex, +value);
+          } else {
+            updateQuantityInQueue(queueIndex, +value);
+          }
         }}
         placeholder='Quantity'
       />
-      {scanMode === "RECEIVE" ? (
-        <FormInput
-          type='number'
-          label='Lot Number'
-          value={lot.lotNumber ?? ""}
-          setValue={(value) => {
-            updateLotNumberInLot(queueIndex, lotIndex, value);
-          }}
-          placeholder='Enter Lot Number (Optional)'
-        />
-      ) : <LotDropdown productId={item.id} />}
-      <FormInput
-        type='month'
-        label='Expiration Date'
-        value={lot.expirationDate ?? ""}
-        setValue={(value) => {
-          updateExpirationDateInLot(queueIndex, lotIndex, value);
-        }}
-        customStyles='w-full'
-      />
+      {scanMode === "RECEIVE" && (
+        <>
+          <FormInput
+            type='number'
+            label='Lot Number'
+            value={lot.lotNumber ?? ""}
+            setValue={(value) => {
+              updateLotNumberInLot(queueIndex, lotIndex, value);
+            }}
+            placeholder='Enter Lot Number (Optional)'
+          />
+
+          {/* { : (<LotDropdown productId={item.id} />)} */}
+          <FormInput
+            type='month'
+            label='Expiration Date'
+            value={lot.expirationDate ?? ""}
+            setValue={(value) => {
+              updateExpirationDateInLot(queueIndex, lotIndex, value);
+            }}
+            customStyles='w-full'
+          />
+        </>
+      )}
       <FormInput
         label='Note'
-        value={lot.note ?? ""}
+        value={
+          (scanMode === "RECEIVE" ? lot.note : item.note) ?? ""
+        }
         setValue={(value) => {
-          updateNoteInLot(queueIndex, lotIndex, value);
-          // updateItemNoteInQueue(queueIndex, value);
+          if (scanMode === "RECEIVE") {
+            updateNoteInLot(queueIndex, lotIndex, value);
+          } else {
+            updateItemNoteInQueue(queueIndex, value);
+          }
         }}
         placeholder='Note (Optional)'
       />
