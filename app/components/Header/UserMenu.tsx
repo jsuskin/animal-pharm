@@ -22,7 +22,7 @@ export default function UserMenu({
     <div className='absolute top-0 left-0 w-screen h-screen bg-transparent'>
       <div
         ref={menuRef}
-        className='absolute flex flex-col p-2 px-4 top-8 right-7 bg-blue-200 text-lg text-black text-center font-bold rounded-sm z-99 gap-2'
+        className='absolute flex flex-col p-2 px-4 top-8 right-7 bg-zinc-700 text-lg text-white text-center font-bold rounded-sm z-99 gap-2'
       >
         {user ? (
           <button

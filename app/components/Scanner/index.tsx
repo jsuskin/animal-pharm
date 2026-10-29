@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useZxing } from "react-zxing";
 import { useStore } from "@/app/store/useStore";
 import {
@@ -22,16 +22,21 @@ export default function Scanner() {
   const [scanResult, setScanResult] = useState("");
   const [cameraId, setCameraId] = useState<string | null>(null);
   const [cameraSelectionComplete, setCameraSelectionComplete] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const inventory = useStore((state) => state.inventory);
   const scannerActive = useStore((state) => !!state.scanner.mode);
   const scannedQueue = useStore((state) => state.scanner.queue);
   const startScanner = useStore((state) => state.startScanner);
+  const clearQueue = useStore((state) => state.clearQueue);
+  const copyQueueToRecovery = useStore((state) => state.copyQueueToRecovery);
   const stopScanner = useStore((state) => state.stopScanner);
   const addToScannedQueue = useStore((state) => state.addToScannedQueue);
 
   const searchParams = useSearchParams();
   const scanMode = searchParams.get("action")?.toUpperCase() as TransactionType;
+
+  const router = useRouter();
 
   const isFullyReady = scannerActive && cameraSelectionComplete;
 
@@ -50,12 +55,22 @@ export default function Scanner() {
         if (scannedQueue.find((item) => item.value === result)) return;
 
         const product = findProductByScanResult(inventory, result, scanFormat);
+
+        navigator.vibrate(50);
+
+        if (scanMode === "ADJUST") {
+          if (!product) {
+            setShowToast(true);
+          } else {
+            router.push(`/product/${product.id}`);
+          }
+          return;
+        }
+
         const newItem = packageScanResultForQueue(result, product, scanFormat);
 
         setScanResult(result);
         addToScannedQueue(newItem);
-
-        navigator.vibrate(50);
       }
     },
     onError(err) {
@@ -87,8 +102,24 @@ export default function Scanner() {
     };
   }, [startScanner, scanMode]);
 
+  useEffect(() => {
+    if (showToast) setTimeout(() => setShowToast(false), 3000);
+  }, [showToast]);
+
+  const pauseScanning = () => {
+    copyQueueToRecovery();
+    clearQueue();
+    stopScanner();
+  };
+
   return (
     <div className='fixed inset-0 z-[9999] w-screen h-screen bg-black'>
+      <div
+        className='absolute bg-gray-700 top-15 left-1/2 -translate-x-1/2 p-3 w-80 rounded-sm z-9999 transition duration-300 ease-in-out'
+        style={{ opacity: showToast ? "70%" : 0, pointerEvents: showToast ? "auto" : "none" }}
+      >
+        <p>Item not found. Please switch scan mode to RECEIVE or try again.</p>
+      </div>
       {!isFullyReady ? (
         <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-16 border-[#ccc] border-t-white border-8 rounded-[50%] animate-spin' />
       ) : (
@@ -101,21 +132,30 @@ export default function Scanner() {
             <button>
               <InfoIcon size={32} className='text-slate-400' />
             </button>
-            <Link href='/' onClick={stopScanner}>
+            <Link href='/' onClick={pauseScanning}>
               <XIcon size={32} className='text-slate-400' />
             </Link>
           </div>
-          <ScannedItemFields
-            key={scanResult}
-            scanResult={scanResult}
-            setScanResult={setScanResult}
-            scanMode={scanMode}
-          />
-          <ScannerControls scanFormat={scanFormat} setScanFormat={setScanFormat} torch={torch} />
-          <ScannedQueue
-            scanResult={scanResult}
-            setScanResult={setScanResult}
+          {scanMode !== "ADJUST" && (
+            <>
+              <ScannedItemFields
+                key={scanResult}
+                scanResult={scanResult}
+                setScanResult={setScanResult}
+                scanMode={scanMode}
+              />
+              <ScannedQueue
+                scanResult={scanResult}
+                setScanResult={setScanResult}
+                scanFormat={scanFormat}
+              />
+            </>
+          )}
+          <ScannerControls
             scanFormat={scanFormat}
+            setScanFormat={setScanFormat}
+            torch={torch}
+            scanMode={scanMode}
           />
           <video ref={ref} muted playsInline className='w-full h-full object-cover' />
         </>

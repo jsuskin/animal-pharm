@@ -11,6 +11,8 @@ export type Product = {
   notes: string | null;
   upc: string | null;
   qr_code: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type ProductWithQuantity = Product & { quantity: number };
@@ -35,3 +37,6 @@ export type LotInput = {
 };
 
 export type TransactionType = "RECEIVE" | "DISPENSE" | "WASTE" | "ADJUST";
+
+export type SortBy = "name" | "quantity" | "updated_at";
+export type SortDirection = "ascending" | "descending";

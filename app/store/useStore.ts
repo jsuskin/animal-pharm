@@ -1,17 +1,45 @@
 import { create } from "zustand";
-import type { LotInput, Product, ScannedItem, TransactionType } from "@/utils/types";
+import type {
+  LotInput,
+  Product,
+  ScannedItem,
+  TransactionType,
+  SortBy,
+  SortDirection,
+} from "@/utils/types";
+
+/*** 
+
+ ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓████████▓▒░
+    ░▒▓█▓▒░   ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░     
+    ░▒▓█▓▒░    ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓██████▓▒░  
+    ░▒▓█▓▒░      ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓█▓▒░       
+    ░▒▓█▓▒░      ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓████████▓▒░
+
+    ***/
 
 interface Store {
   inventory: Product[];
+  sort: { by: SortBy; direction: SortDirection };
+  setSortDirection: (direction: SortDirection) => void;
+  setSortBy: (by: SortBy) => void;
   setProducts: (products: Product[]) => void;
   addProduct: (newProduct: Product) => void;
   deleteProduct: (id: string) => void;
-  scanner: { queue: ScannedItem[]; mode: TransactionType | null; currentQueueIndex: number };
+  scanner: {
+    queue: ScannedItem[];
+    mode: TransactionType | null;
+    currentQueueIndex: number;
+    recovery: ScannedItem[];
+  };
   startScanner: (mode: TransactionType) => void;
   stopScanner: () => void;
   addToScannedQueue: (newItem: ScannedItem) => void;
   setCurrentQueueIndex: (idx: number) => void;
   removeFromScannedQueue: (idx: number) => void;
+  clearQueue: () => void;
+  swapQueueAndRecovery: () => void;
+  copyQueueToRecovery: () => void;
   updateNameAndIdInQueue: (idx: number, id: string, displayName: string) => void;
   updateQuantityInQueue: (queueIdx: number, quantity: number) => void;
   updateItemNoteInQueue: (queueIdx: number, note: string) => void;
@@ -22,13 +50,29 @@ interface Store {
   updateExpirationDateInLot: (queueIdx: number, lotIdx: number, expirationDate: string) => void;
 }
 
+/*** 
+
+░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░▒▓████████▓ 
+░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░     
+░▒▓██████▓▒░  ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░  ░▒▓█▓▒░   
+░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░   
+░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░       ░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░ 
+    
+    ***/
+
+const scannedQueueDefaultState = { queue: [], mode: null, currentQueueIndex: -1, recovery: [] };
+
 export const useStore = create<Store>((set) => ({
   inventory: [],
+  sort: { by: "updated_at", direction: "ascending" },
+  setSortDirection: (direction: SortDirection) =>
+    set((state) => ({ sort: { by: state.sort.by, direction } })),
+  setSortBy: (by: SortBy) => set((state) => ({ sort: { by, direction: state.sort.direction } })),
   setProducts: (products: Product[]) => set({ inventory: products }),
   addProduct: (newProduct) => set((state) => ({ inventory: [...state.inventory, newProduct] })),
   deleteProduct: (id) =>
     set((state) => ({ inventory: state.inventory.filter((product) => product.id !== id) })),
-  scanner: { queue: [], mode: null, currentQueueIndex: -1 },
+  scanner: scannedQueueDefaultState,
   startScanner: (mode) => set((state) => ({ scanner: { ...state.scanner, mode } })),
   stopScanner: () => set((state) => ({ scanner: { ...state.scanner, mode: null } })),
   addToScannedQueue: (newItem) =>
@@ -44,6 +88,22 @@ export const useStore = create<Store>((set) => ({
   removeFromScannedQueue: (idx) =>
     set((state) => ({
       scanner: { ...state.scanner, queue: state.scanner.queue.filter((_, i) => i !== idx) },
+    })),
+  clearQueue: () =>
+    set((state) => ({
+      scanner: { ...scannedQueueDefaultState, recovery: state.scanner.recovery },
+    })),
+  swapQueueAndRecovery: () =>
+    set((state) => ({
+      scanner: {
+        ...state.scanner,
+        queue: structuredClone(state.scanner.recovery),
+        recovery: structuredClone(state.scanner.queue),
+      },
+    })),
+  copyQueueToRecovery: () =>
+    set((state) => ({
+      scanner: { ...state.scanner, recovery: structuredClone(state.scanner.queue) },
     })),
   updateNameAndIdInQueue: (idx, id, displayName) =>
     set((state) => ({

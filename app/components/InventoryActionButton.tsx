@@ -24,7 +24,7 @@ export default function InventoryActionButton({
       style={{ transitionDelay: `${delay}ms` }}
     >
       <Link href={`/scan?action=${mode.toLowerCase()}`}>
-        <div className='flex justify-end items-center py-2 px-3 bg-blue-200 rounded-xl text-xl text-black font-bold gap-2'>
+        <div className='flex justify-end items-center py-2 px-3 bg-zinc-700 rounded-xl text-xl text-white font-bold gap-2'>
           <span>{mode}</span>
           {mode === "RECEIVE" ? (
             <HandArrowDownIcon {...iconProps} />

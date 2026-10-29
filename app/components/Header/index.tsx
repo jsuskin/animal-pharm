@@ -27,7 +27,7 @@ export default function Header({ user }: { user: User | null }) {
           <div className='h-1 bg-white w-2/3'></div>
           <div className='h-1 bg-white w-1/3'></div>
         </button>
-        {sortMenuOpen && <SortOptions />}
+        {sortMenuOpen && <SortOptions closeMenu={() => setSortMenuOpen(false)} />}
       </div>
       <div className='justify-self-center'>
         <Link href='/'>
@@ -38,7 +38,9 @@ export default function Header({ user }: { user: User | null }) {
         <button onClick={() => setUserMenuOpen(!userMenuOpen)}>
           <UserCircleIcon size={40} />
         </button>
-        {userMenuOpen && <UserMenu user={user} setMenuOpen={setUserMenuOpen} menuOpen={userMenuOpen} />}
+        {userMenuOpen && (
+          <UserMenu user={user} setMenuOpen={setUserMenuOpen} menuOpen={userMenuOpen} />
+        )}
         {/* {user ? (
           <button
             onClick={async () => {
@@ -60,6 +62,9 @@ export default function Header({ user }: { user: User | null }) {
           </Link>
         )} */}
       </div>
+      {/* <div className='absolute w-full h-full bg-zinc-900 top-0 left-0'>
+        <h1>Filter Options</h1>
+      </div> */}
     </header>
   );
 }

@@ -10,6 +10,8 @@ export default function Page() {
   const scanMode = useStore((state) => state.scanner.mode);
   const scannedQueue = useStore((state) => state.scanner.queue);
   const addNewEmptyLotObjectInQueue = useStore((state) => state.addNewEmptyLotObjectInQueue);
+  const clearQueue = useStore((state) => state.clearQueue);
+  const copyQueueToRecovery = useStore((state) => state.copyQueueToRecovery);
 
   const router = useRouter();
 
@@ -67,13 +69,14 @@ export default function Page() {
 
           console.log("New Dispense Transaction", newDispenseTransaction);
         }
-
-        router.push("/");
       }
     } catch (error) {
       console.error("Failed to process transaction queue:", error);
-      // maybe a toast or smth here
+      copyQueueToRecovery();
     }
+
+    clearQueue();
+    router.push("/");
   };
 
   return (

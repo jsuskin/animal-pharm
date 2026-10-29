@@ -5,16 +5,21 @@ import { useEffect, useState } from "react";
 import { useStore } from "../store/useStore";
 import Inventory from "./Inventory";
 import InventoryActionButton from "./InventoryActionButton";
+import { sortProducts } from "@/utils/helperMethods";
 
 export default function HomeClient({ products }: { products: ProductWithQuantity[] | null }) {
   const [startTransaction, setStartTransaction] = useState(false);
   const setProducts = useStore((state) => state.setProducts);
+  const sortBy = useStore((state) => state.sort.by)
+  const sortDirection = useStore((state) => state.sort.direction)
 
   useEffect(() => {
     if (!products) return;
 
-    setProducts(products);
-  }, [products, setProducts]);
+    const sorted = sortProducts(products, sortDirection, sortBy);
+
+    setProducts(sorted);
+  }, [products, setProducts, sortBy, sortDirection]);
 
   return (
     <>
@@ -28,15 +33,15 @@ export default function HomeClient({ products }: { products: ProductWithQuantity
         </div>
 
         <button
-          className={`p-2 bg-blue-200 ${startTransaction ? "rounded-[50px]" : "rounded-[16px]"} transition-[border-radius] duration-600`}
+          className={`p-2 bg-zinc-700 ${startTransaction ? "rounded-[50px]" : "rounded-[16px]"} transition-[border-radius] duration-600`}
           onPointerDown={() => {
             setStartTransaction(!startTransaction);
           }}
         >
           {startTransaction ? (
-            <XIcon size={40} color='black' weight='bold' />
+            <XIcon size={40} color='white' weight='bold' />
           ) : (
-            <ScanIcon size={40} color='black' weight='light' />
+            <ScanIcon size={40} color='white' weight='light' />
           )}
         </button>
       </div>

@@ -1,4 +1,4 @@
-import { Product, ScanFormat } from "./types";
+import { Product, ProductWithQuantity, ScanFormat } from "./types";
 
 export const getNewProductFormURL = (scanResult: string, scanFormat: ScanFormat) => {
   const params = new URLSearchParams();
@@ -89,3 +89,25 @@ export async function selectBestBackCamera() {
 
   return best; // null if nothing matched — caller should fall back to facingMode
 }
+
+export const sortProducts = (
+  products: ProductWithQuantity[],
+  sortDirection: "ascending" | "descending" = "ascending",
+  sortBy: "updated_at" | "name" | "quantity" = "updated_at",
+) => {
+  return [...products].sort((a, b) => {
+    const x = sortDirection === "ascending" ? b : a;
+    const y = sortDirection === "ascending" ? a : b;
+
+    switch (sortBy) {
+      case "name":
+        return y.name.localeCompare(x.name);
+      case "quantity":
+        return y.quantity - x.quantity;
+      case "updated_at":
+        return Date.parse(x.updated_at) - Date.parse(y.updated_at);
+      default:
+        return 0;
+    }
+  });
+};

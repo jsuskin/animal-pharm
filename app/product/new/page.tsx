@@ -6,11 +6,9 @@ import { useStore } from "@/app/store/useStore";
 
 export default function Page() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-
   const scanResult = searchParams.get("result") || "";
-
   const scanMode = useStore((state) => state.scanner.mode);
+  const router = useRouter();
 
   return (
     <div className='relative bg-black w-full h-screen'>
@@ -22,8 +20,11 @@ export default function Page() {
       >
         <XIcon size={32} className='text-slate-400' />
       </button>
-      <div className='w-full flex justify-center mt-8'>
-        <h2 className='text-3xl mt-8 mb-4 text-slate-400'>{scanResult}</h2>
+      <div className='w-full flex flex-col justify-center text-center mt-8 mb-4'>
+        <h2 className='text-lg mt-8 text-slate-400/80'>
+          Please fill out the product information for{" "}
+        </h2>
+        <h2 className='text-2xl text-green-300'>{scanResult}</h2>
       </div>
       <NewProductForm key={scanResult} scanResult={scanResult} />
     </div>

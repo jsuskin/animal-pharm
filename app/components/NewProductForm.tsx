@@ -34,6 +34,8 @@ export default function NewProductForm({ scanResult }: { scanResult: string }) {
 
     if (!name || !sku) return;
 
+    const now = new Date().toISOString();
+
     const newProduct: Product = {
       name,
       manufacturer,
@@ -46,6 +48,8 @@ export default function NewProductForm({ scanResult }: { scanResult: string }) {
       notes,
       upc: scanFormat === "ean_13" ? scanResult : null,
       qr_code: scanFormat === "qr_code" ? scanResult : null,
+      created_at: now,
+      updated_at: now,
     };
 
     const { data, error } = await insertProduct(newProduct);
@@ -62,11 +66,6 @@ export default function NewProductForm({ scanResult }: { scanResult: string }) {
     const packaged = packageScanResultForQueue(scanResult, newProduct, scanFormat as ScanFormat);
 
     updateNameAndIdInQueue(queueIndex, data.id, packaged.displayName);
-
-    if (scannerActive) {
-      router.push("/");
-      return;
-    }
 
     const nextNewItem = scannedQueue.find((item) => !item.id && item.value !== scanResult);
 
@@ -88,7 +87,7 @@ export default function NewProductForm({ scanResult }: { scanResult: string }) {
       <FormInput label='Type' value={type} setValue={setType} />
       <FormInput label='SKU' value={sku} setValue={setSku} />
       <FormInput label='Notes' value={notes} setValue={setNotes} />
-      <div className="h-20" />
+      <div className='h-20' />
       <button
         type='submit'
         disabled={!name.length || !manufacturer.length}
