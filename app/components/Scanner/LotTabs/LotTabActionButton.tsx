@@ -5,18 +5,24 @@ export function LotTabActionButton({
   handleClick,
 }: {
   icon: "plus" | "minus";
-  handleClick: () => void;
+  handleClick?: () => void;
 }) {
+  const isInteractive = !!handleClick;
+  const Button = isInteractive ? "button" : "div";
+  const Icon = icon === "plus" ? PlusIcon : MinusIcon;
+
   return (
     <li
       className={`relative flex w-14 h-7 border border-gray-400 border-b-transparent text-gray-400 p-2 justify-center items-center rounded-t-md`}
     >
-      <button
+      <Button
         className='absolute flex justify-center items-center w-full h-full'
         onClick={handleClick}
       >
-        <span>{icon === "plus" ? <PlusIcon size={14} /> : <MinusIcon size={14} />}</span>
-      </button>
+        <span>
+          <Icon size={14} />
+        </span>
+      </Button>
     </li>
   );
 }

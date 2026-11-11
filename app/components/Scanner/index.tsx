@@ -15,6 +15,7 @@ import ScannedItemFields from "./ScannedItemFields";
 import { InfoIcon, SplitHorizontalIcon, XIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import ScanMode from "./ScanMode";
+import InfoModal from "./InfoModal";
 
 export default function Scanner() {
   const [hasCamera, setHasCamera] = useState(false);
@@ -23,6 +24,7 @@ export default function Scanner() {
   const [cameraId, setCameraId] = useState<string | null>(null);
   const [cameraSelectionComplete, setCameraSelectionComplete] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   const inventory = useStore((state) => state.inventory);
   const scannerActive = useStore((state) => !!state.scanner.mode);
@@ -114,6 +116,7 @@ export default function Scanner() {
 
   return (
     <div className='fixed inset-0 z-[9999] w-screen h-screen bg-black'>
+      {showInfoModal && <InfoModal closeModal={() => setShowInfoModal(false)} />}
       <div
         className='absolute bg-gray-700 top-15 left-1/2 -translate-x-1/2 p-3 w-80 rounded-sm z-9999 transition duration-300 ease-in-out'
         style={{ opacity: showToast ? "70%" : 0, pointerEvents: showToast ? "auto" : "none" }}
@@ -126,10 +129,10 @@ export default function Scanner() {
         <>
           <ScanMode />
           <div className='absolute flex right-0 top-0 m-4 gap-4'>
-            <button>
+            {/* <button>
               <SplitHorizontalIcon size={32} className='text-slate-400' />
-            </button>
-            <button>
+            </button> */}
+            <button onClick={() => setShowInfoModal((prev) => !prev)}>
               <InfoIcon size={32} className='text-slate-400' />
             </button>
             <Link href='/' onClick={pauseScanning}>

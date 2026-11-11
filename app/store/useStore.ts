@@ -1,14 +1,14 @@
 import { create } from "zustand";
 import type {
-  LotInput,
-  Product,
   ScannedItem,
   TransactionType,
   SortBy,
   SortDirection,
+  ProductWithQuantity,
 } from "@/utils/types";
 
-/*** 
+
+/* 
 
  ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓████████▓▒░
     ░▒▓█▓▒░   ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░     
@@ -16,15 +16,16 @@ import type {
     ░▒▓█▓▒░      ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓█▓▒░       
     ░▒▓█▓▒░      ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓████████▓▒░
 
-    ***/
+    */
+   
 
 interface Store {
-  inventory: Product[];
+  inventory: ProductWithQuantity[];
   sort: { by: SortBy; direction: SortDirection };
   setSortDirection: (direction: SortDirection) => void;
   setSortBy: (by: SortBy) => void;
-  setProducts: (products: Product[]) => void;
-  addProduct: (newProduct: Product) => void;
+  setProducts: (products: ProductWithQuantity[]) => void;
+  addProduct: (newProduct: ProductWithQuantity) => void;
   deleteProduct: (id: string) => void;
   scanner: {
     queue: ScannedItem[];
@@ -45,12 +46,14 @@ interface Store {
   updateItemNoteInQueue: (queueIdx: number, note: string) => void;
   addNewEmptyLotObjectInQueue: (queueIdx: number) => void;
   updateLotNumberInLot: (queueIdx: number, lotIdx: number, lotNumber: string) => void;
+  updateSourceInLot: (queueIdx: number, lotIdx: number, source: string) => void;
   updateQuantityInLot: (queueIdx: number, lotIdx: number, quantity: number) => void;
   updateNoteInLot: (queueIdx: number, lotIdx: number, note: string) => void;
   updateExpirationDateInLot: (queueIdx: number, lotIdx: number, expirationDate: string) => void;
 }
 
-/*** 
+
+/* 
 
 ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░▒▓████████▓ 
 ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░     
@@ -58,7 +61,8 @@ interface Store {
 ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░   
 ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░       ░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░ 
     
-    ***/
+    */
+
 
 const scannedQueueDefaultState = { queue: [], mode: null, currentQueueIndex: -1, recovery: [] };
 
@@ -68,7 +72,7 @@ export const useStore = create<Store>((set) => ({
   setSortDirection: (direction: SortDirection) =>
     set((state) => ({ sort: { by: state.sort.by, direction } })),
   setSortBy: (by: SortBy) => set((state) => ({ sort: { by, direction: state.sort.direction } })),
-  setProducts: (products: Product[]) => set({ inventory: products }),
+  setProducts: (products: ProductWithQuantity[]) => set({ inventory: products }),
   addProduct: (newProduct) => set((state) => ({ inventory: [...state.inventory, newProduct] })),
   deleteProduct: (id) =>
     set((state) => ({ inventory: state.inventory.filter((product) => product.id !== id) })),
@@ -140,7 +144,13 @@ export const useStore = create<Store>((set) => ({
                 ...item,
                 lots: [
                   ...(state.scanner.queue[queueIdx].lots ?? []),
-                  { lotNumber: null, expirationDate: null, quantity: null, note: null },
+                  {
+                    lotNumber: null,
+                    expirationDate: null,
+                    quantity: null,
+                    note: null,
+                    source: null,
+                  },
                 ],
               }
             : item,
@@ -156,6 +166,20 @@ export const useStore = create<Store>((set) => ({
             ? {
                 ...item,
                 lots: item.lots?.map((lot, j) => (j === lotIdx ? { ...lot, lotNumber } : lot)),
+              }
+            : item,
+        ),
+      },
+    })),
+  updateSourceInLot: (queueIdx, lotIdx, source) =>
+    set((state) => ({
+      scanner: {
+        ...state.scanner,
+        queue: state.scanner.queue.map((item, i) =>
+          i === queueIdx
+            ? {
+                ...item,
+                lots: item.lots?.map((lot, j) => (j === lotIdx ? { ...lot, source } : lot)),
               }
             : item,
         ),

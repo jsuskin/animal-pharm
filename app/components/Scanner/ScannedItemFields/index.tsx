@@ -23,6 +23,7 @@ export default function ScannedItemFields({
   const updateNoteInLot = useStore((state) => state.updateNoteInLot);
   const updateNoteInQueue = useStore((state) => state.updateItemNoteInQueue);
   const updateLotNumberInLot = useStore((state) => state.updateLotNumberInLot);
+  const updateSourceInLot = useStore((state) => state.updateSourceInLot);
   const currentQueueIndex = useStore((state) => state.scanner.currentQueueIndex);
 
   const currentItem = scannedQueue[currentQueueIndex];
@@ -45,6 +46,8 @@ export default function ScannedItemFields({
     scanMode === "RECEIVE"
       ? updateNoteInLot(currentQueueIndex, currentLotIndex, e.target.value)
       : updateNoteInQueue(currentQueueIndex, e.target.value);
+
+  const source = currentItem?.lots![currentLotIndex].source;
 
   return (
     <section>
@@ -99,6 +102,14 @@ export default function ScannedItemFields({
                   }}
                   placeholder='Lot Number'
                 />
+                <input
+                  className='border border-gray-400 p-2 text-white w-full'
+                  value={source ?? ""}
+                  onChange={(e) => {
+                    updateSourceInLot(currentQueueIndex, currentLotIndex, e.target.value);
+                  }}
+                  placeholder='Source'
+                />
                 <ExpiryMonthInput
                   currentQueueIndex={currentQueueIndex}
                   currentLotIndex={currentLotIndex}
@@ -106,12 +117,12 @@ export default function ScannedItemFields({
                 />
               </>
             )}
-            <input
+            {/* <input
               className='border border-gray-400 p-2 text-white w-full'
               placeholder='Note'
               value={note ?? ""}
               onChange={setNote}
-            />
+            /> */}
           </>
         )}
       </div>

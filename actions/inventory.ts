@@ -35,7 +35,7 @@ export async function createNewLotTransaction(
   quantity: number,
   note: string,
   mode: TransactionType,
-  source: string = "manufacturer", // temp type/default
+  source: string | null
 ) {
   const supabase = await createClient();
 

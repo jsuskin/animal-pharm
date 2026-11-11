@@ -1,8 +1,9 @@
+import { truncateText } from "@/utils/helperMethods";
 import { ProductWithQuantity } from "@/utils/types";
 import { DotsThreeVerticalIcon } from "@phosphor-icons/react";
+import Link from "next/link";
 import { useState } from "react";
 import ContextMenu from "./ContextMenu";
-import Link from "next/link";
 
 export default function ProductCard({ product }: { product: ProductWithQuantity }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,8 +31,8 @@ export default function ProductCard({ product }: { product: ProductWithQuantity 
           <DotsThreeVerticalIcon size={28} />
         </button>
         <div>
-          <p className='text-md italic font-extralight'>{product.manufacturer}</p>
-          <p className='text-2xl font-medium'>{product.name}</p>
+          <p className='text-md italic font-extralight'>{truncateText(product.manufacturer)}</p>
+          <p className='text-2xl font-medium'>{truncateText(product.name)}</p>
         </div>
         <div className='flex justify-between font-light text-xs py-2'>
           <p>SKU: {product.sku}</p>

@@ -22,6 +22,7 @@ export default function LotReviewFields({
   const updateNoteInLot = useStore((state) => state.updateNoteInLot);
   const updateExpirationDateInLot = useStore((state) => state.updateExpirationDateInLot);
   const updateLotNumberInLot = useStore((state) => state.updateLotNumberInLot);
+  const updateSourceInLot = useStore((state) => state.updateSourceInLot);
 
   console.log("Scan Mode:", scanMode, "Lot index:", lotIndex, "Lot:", lot);
 
@@ -56,6 +57,15 @@ export default function LotReviewFields({
 
           {/* { : (<LotDropdown productId={item.id} />)} */}
           <FormInput
+            type='text'
+            label='Source'
+            value={lot.source ?? ""}
+            setValue={(value) => {
+              updateSourceInLot(queueIndex, lotIndex, value);
+            }}
+            placeholder='Enter Lot Number (Optional)'
+          />
+          <FormInput
             type='month'
             label='Expiration Date'
             value={lot.expirationDate ?? ""}
@@ -68,9 +78,7 @@ export default function LotReviewFields({
       )}
       <FormInput
         label='Note'
-        value={
-          (scanMode === "RECEIVE" ? lot.note : item.note) ?? ""
-        }
+        value={(scanMode === "RECEIVE" ? lot.note : item.note) ?? ""}
         setValue={(value) => {
           if (scanMode === "RECEIVE") {
             updateNoteInLot(queueIndex, lotIndex, value);

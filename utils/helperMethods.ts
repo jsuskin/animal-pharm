@@ -1,5 +1,9 @@
 import { Product, ProductWithQuantity, ScanFormat } from "./types";
 
+export const truncateText = (text: string | null, limit: number = 33) => {
+  return text && text.length > limit ? text.substring(0, limit - 3) + "..." : text;
+};
+
 export const getNewProductFormURL = (scanResult: string, scanFormat: ScanFormat) => {
   const params = new URLSearchParams();
   params.set("result", scanResult);
@@ -34,6 +38,7 @@ export const packageScanResultForQueue = (
       expirationDate: null,
       quantity: null,
       note: null,
+      source: null,
     },
   ],
 });

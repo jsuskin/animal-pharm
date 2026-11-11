@@ -44,8 +44,6 @@ export default function Page() {
               }
             }
 
-            const source = "manufacturer"; // !!! TEMP !!!
-
             const newLotTransaction = await createNewLotTransaction(
               lot.lotNumber ?? "",
               expirationDate,
@@ -54,7 +52,7 @@ export default function Page() {
               lot.quantity!,
               lot.note ?? "",
               scanMode!,
-              source,
+              lot.source,
             );
 
             console.log("New Lot Transaction:", newLotTransaction);

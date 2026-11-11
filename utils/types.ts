@@ -34,6 +34,7 @@ export type LotInput = {
   expirationDate: string | null;
   quantity: number | null;
   note: string | null;
+  source: string | null;
 };
 
 export type TransactionType = "RECEIVE" | "DISPENSE" | "WASTE" | "ADJUST";

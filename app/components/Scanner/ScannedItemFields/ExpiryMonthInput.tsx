@@ -33,7 +33,7 @@ export default function ExpiryMonthInput({
   return (
     <div className='relative w-full border border-gray-400 p-2 focus-within:ring-1 focus-within:ring-gray-300'>
       <span className={display ? "text-white" : "text-gray-100/50"}>
-        {display || "Expiration Date"}
+        {display || "Expiration Date (Leave blank if not applicable)"}
       </span>
       <input
         ref={ref}
