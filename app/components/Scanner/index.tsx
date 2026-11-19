@@ -12,10 +12,11 @@ import { ScanFormat, TransactionType } from "@/utils/types";
 import ScannedQueue from "./ScannedQueue";
 import ScannerControls from "./ScannerControls";
 import ScannedItemFields from "./ScannedItemFields";
-import { InfoIcon, SplitHorizontalIcon, XIcon } from "@phosphor-icons/react";
+import { InfoIcon, XIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import ScanMode from "./ScanMode";
 import InfoModal from "./InfoModal";
+import Toast from "../Toast";
 
 export default function Scanner() {
   const [hasCamera, setHasCamera] = useState(false);
@@ -60,12 +61,18 @@ export default function Scanner() {
 
         navigator.vibrate(50);
 
+        if (!product && (scanMode === "DISPENSE" || scanMode === "WASTE")) {
+          setShowToast(true);
+          return;
+        }
+
         if (scanMode === "ADJUST") {
           if (!product) {
             setShowToast(true);
           } else {
             router.push(`/product/${product.id}`);
           }
+
           return;
         }
 
@@ -104,10 +111,6 @@ export default function Scanner() {
     };
   }, [startScanner, scanMode]);
 
-  useEffect(() => {
-    if (showToast) setTimeout(() => setShowToast(false), 3000);
-  }, [showToast]);
-
   const pauseScanning = () => {
     copyQueueToRecovery();
     clearQueue();
@@ -117,21 +120,17 @@ export default function Scanner() {
   return (
     <div className='fixed inset-0 z-[9999] w-screen h-screen bg-black'>
       {showInfoModal && <InfoModal closeModal={() => setShowInfoModal(false)} />}
-      <div
-        className='absolute bg-gray-700 top-15 left-1/2 -translate-x-1/2 p-3 w-80 rounded-sm z-9999 transition duration-300 ease-in-out'
-        style={{ opacity: showToast ? "70%" : 0, pointerEvents: showToast ? "auto" : "none" }}
-      >
-        <p>Item not found. Please switch scan mode to RECEIVE or try again.</p>
-      </div>
+      <Toast
+        text='Item not found. Please switch scan mode to RECEIVE or try again.'
+        showToast={showToast}
+        closeToast={() => setShowToast(false)}
+      />
       {!isFullyReady ? (
         <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-16 border-[#ccc] border-t-white border-8 rounded-[50%] animate-spin' />
       ) : (
         <>
           <ScanMode />
           <div className='absolute flex right-0 top-0 m-4 gap-4'>
-            {/* <button>
-              <SplitHorizontalIcon size={32} className='text-slate-400' />
-            </button> */}
             <button onClick={() => setShowInfoModal((prev) => !prev)}>
               <InfoIcon size={32} className='text-slate-400' />
             </button>

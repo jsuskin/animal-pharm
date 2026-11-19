@@ -103,6 +103,7 @@ export default function Page() {
             ))}
             {scanMode === "RECEIVE" && (
               <button
+                type='button'
                 className='flex flex-col items-center mt-1 mb-2'
                 onClick={() => {
                   addNewEmptyLotObjectInQueue(i);

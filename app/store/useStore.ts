@@ -7,7 +7,6 @@ import type {
   ProductWithQuantity,
 } from "@/utils/types";
 
-
 /* 
 
  ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓████████▓▒░
@@ -17,7 +16,6 @@ import type {
     ░▒▓█▓▒░      ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓████████▓▒░
 
     */
-   
 
 interface Store {
   inventory: ProductWithQuantity[];
@@ -45,13 +43,13 @@ interface Store {
   updateQuantityInQueue: (queueIdx: number, quantity: number) => void;
   updateItemNoteInQueue: (queueIdx: number, note: string) => void;
   addNewEmptyLotObjectInQueue: (queueIdx: number) => void;
+  removeLastLotObjectInQueue: (queueIdx: number) => void;
   updateLotNumberInLot: (queueIdx: number, lotIdx: number, lotNumber: string) => void;
   updateSourceInLot: (queueIdx: number, lotIdx: number, source: string) => void;
   updateQuantityInLot: (queueIdx: number, lotIdx: number, quantity: number) => void;
   updateNoteInLot: (queueIdx: number, lotIdx: number, note: string) => void;
   updateExpirationDateInLot: (queueIdx: number, lotIdx: number, expirationDate: string) => void;
 }
-
 
 /* 
 
@@ -62,7 +60,6 @@ interface Store {
 ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░       ░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░ 
     
     */
-
 
 const scannedQueueDefaultState = { queue: [], mode: null, currentQueueIndex: -1, recovery: [] };
 
@@ -157,6 +154,24 @@ export const useStore = create<Store>((set) => ({
         ),
       },
     })),
+  removeLastLotObjectInQueue: (queueIdx) =>
+    set((state) =>
+      state.scanner.queue[queueIdx].lots && state.scanner.queue[queueIdx].lots.length
+        ? {
+            scanner: {
+              ...state.scanner,
+              queue: state.scanner.queue.map((item, i) =>
+                i === queueIdx
+                  ? {
+                      ...item,
+                      lots: state.scanner.queue[queueIdx].lots?.slice(0, -1),
+                    }
+                  : item,
+              ),
+            },
+          }
+        : state,
+    ),
   updateLotNumberInLot: (queueIdx, lotIdx, lotNumber) =>
     set((state) => ({
       scanner: {

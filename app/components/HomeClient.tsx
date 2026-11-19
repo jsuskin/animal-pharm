@@ -1,6 +1,6 @@
 "use client";
 import type { ProductWithQuantity } from "@/utils/types";
-import { ScanIcon, XIcon } from "@phosphor-icons/react";
+import { PackageIcon, ScanIcon, XIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { useStore } from "../store/useStore";
 import Inventory from "./Inventory";
@@ -10,9 +10,10 @@ import { sortProducts } from "@/utils/helperMethods";
 export default function HomeClient({ products }: { products: ProductWithQuantity[] | null }) {
   const [startTransaction, setStartTransaction] = useState(false);
   const setProducts = useStore((state) => state.setProducts);
-  const sortBy = useStore((state) => state.sort.by)
-  const sortDirection = useStore((state) => state.sort.direction)
-
+  const sortBy = useStore((state) => state.sort.by);
+  const sortDirection = useStore((state) => state.sort.direction);
+  const queue = useStore((state) => state.scanner.queue); // !!!NEED TO DECOUPLE QUEUE FROM SCANNER!!!
+  
   useEffect(() => {
     if (!products) return;
 
@@ -32,6 +33,11 @@ export default function HomeClient({ products }: { products: ProductWithQuantity
           <InventoryActionButton mode='WASTE' active={startTransaction} delay={0} />
         </div>
 
+        {!!queue.length && (
+          <button className='p-2 bg-zinc-700 rounded-[16px]' onPointerDown={() => {}}>
+            <PackageIcon size={40} color='white' weight='light' />
+          </button>
+        )}
         <button
           className={`p-2 bg-zinc-700 ${startTransaction ? "rounded-[50px]" : "rounded-[16px]"} transition-[border-radius] duration-600`}
           onPointerDown={() => {

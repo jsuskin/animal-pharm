@@ -1,5 +1,7 @@
 import { LotTabActionButton } from "./LotTabActionButton";
 import { useStore } from "@/app/store/useStore";
+// import { useEffect } from "react";
+// import VConsole from "vconsole";
 
 export default function LotTabs({
   currentLotIndex,
@@ -11,9 +13,16 @@ export default function LotTabs({
   numLots: number;
 }) {
   const addNewEmptyLotObjectInQueue = useStore((state) => state.addNewEmptyLotObjectInQueue);
+  const removeLastLotObjectInQueue = useStore((state) => state.removeLastLotObjectInQueue);
   const currentQueueIndex = useStore((state) => state.scanner.currentQueueIndex);
 
   const getLotTabBorderColor = (i: number) => (currentLotIndex === i ? "green" : "gray");
+
+  // useEffect(() => {
+  //   const vConsole = new VConsole();
+
+  //   return () => vConsole.destroy();
+  // }, []);
 
   return (
     <ul className='absolute flex top-14 left-5 gap-0.5'>
@@ -21,8 +30,8 @@ export default function LotTabs({
         <LotTabActionButton
           icon='minus'
           handleClick={() => {
-            // If current lot index is last index -> -1; else leave alone
-            console.log("Remove Last Lot From Queue:", currentQueueIndex);
+            removeLastLotObjectInQueue(currentQueueIndex);
+            if (numLots - 1 === currentLotIndex) setCurrentLotIndex(currentLotIndex - 1);
           }}
         />
       )}
@@ -45,7 +54,7 @@ export default function LotTabs({
           icon='plus'
           handleClick={() => {
             addNewEmptyLotObjectInQueue(currentQueueIndex); // Add new lot to queue
-            setCurrentLotIndex(currentLotIndex + 1); // Set current lot index to that lot
+            setCurrentLotIndex(numLots); // Set current lot index to that lot
           }}
         />
       )}

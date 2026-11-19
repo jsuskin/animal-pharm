@@ -1,7 +1,6 @@
 import FormInput from "@/app/components/NewProductForm/FormInput";
 import { useStore } from "@/app/store/useStore";
 import { LotInput, ScannedItem, TransactionType } from "@/utils/types";
-import LotDropdown from "./LotDropdown";
 
 export default function LotReviewFields({
   queueIndex,
@@ -54,8 +53,6 @@ export default function LotReviewFields({
             }}
             placeholder='Enter Lot Number (Optional)'
           />
-
-          {/* { : (<LotDropdown productId={item.id} />)} */}
           <FormInput
             type='text'
             label='Source'
